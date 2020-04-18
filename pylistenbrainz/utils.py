@@ -32,7 +32,7 @@ def _validate_submit_listens_payload(listen_type, listens):
             raise Exception #TODO
 
 
-def _convert_api_payload_to_listen(data, username):
+def _convert_api_payload_to_listen(data):
     track_metadata = data['track_metadata']
     additional_info = track_metadata.get('additional_info', {})
     return Listen(
@@ -51,5 +51,5 @@ def _convert_api_payload_to_listen(data, username):
         listening_from=additional_info.get('listening_from'),
         isrc=additional_info.get('isrc'),
         additional_info=additional_info,
-        username=username,
+        username=data.get('username'),
     )

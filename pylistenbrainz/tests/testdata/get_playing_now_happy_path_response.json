@@ -1,0 +1,50 @@
+{
+    "payload": {
+        "count": 1,
+        "latest_listen_ts": 1587245842,
+        "listens": [
+            {
+                "recording_msid": "ae29cef0-4132-49d1-aee8-eeae67763e66",
+                "track_metadata": {
+                    "additional_info": {
+                        "artist_mbids": [],
+                        "artist_msid": "f938216f-647c-4de3-8006-f793a7df4efa",
+                        "artist_names": [
+                            "SOHN"
+                        ],
+                        "discnumber": 1,
+                        "duration_ms": 250407,
+                        "isrc": "GBAFL1600378",
+                        "listening_from": "spotify",
+                        "recording_mbid": "",
+                        "recording_msid": "ae29cef0-4132-49d1-aee8-eeae67763e66",
+                        "release_artist_name": "SOHN",
+                        "release_artist_names": [
+                            "SOHN"
+                        ],
+                        "release_group_mbid": "",
+                        "release_mbid": "",
+                        "release_msid": "e5e40255-355a-48d5-8c20-51fd22ae4e3c",
+                        "spotify_album_artist_ids": [
+                            "https://open.spotify.com/artist/6XZYAWJLL8UIbxAqjKj3cg"
+                        ],
+                        "spotify_album_id": "https://open.spotify.com/album/4ReJh8aIFJ1LlHzg3PBA15",
+                        "spotify_artist_ids": [
+                            "https://open.spotify.com/artist/6XZYAWJLL8UIbxAqjKj3cg"
+                        ],
+                        "spotify_id": "https://open.spotify.com/track/3wEYsKTvfWeCTa339clXBh",
+                        "tags": [],
+                        "track_mbid": "",
+                        "tracknumber": 10,
+                        "work_mbids": []
+                    },
+                    "artist_name": "SOHN",
+                    "release_name": "Rennen",
+                    "track_name": "Harbour"
+                },
+                "user_name": "iliekcomputers"
+            }
+        ],
+        "user_id": "iliekcomputers"
+    }
+}

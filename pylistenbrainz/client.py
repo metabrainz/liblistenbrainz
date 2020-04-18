@@ -17,6 +17,7 @@
 import json
 import requests
 
+from pylistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
 from pylistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
 from urllib.parse import urljoin
 
@@ -25,15 +26,11 @@ API_BASE_URL = 'https://api.listenbrainz.org'
 
 class ListenBrainz:
 
-
-    def set_auth_token(self, auth_token):
-        if self.is_token_valid(auth_token):
-            self._auth_token = auth_token
-        else:
-            raise Exception("Invalid Auth token") #TODO
+    def __init__(self):
+        self._auth_token = None
 
 
-    def require_auth_token(self):
+    def _require_auth_token(self):
         if not self._auth_token:
             raise Exception("No Auth token") #TODO
 
@@ -46,11 +43,13 @@ class ListenBrainz:
         if self._auth_token:
             headers['Authorization'] = 'Token {}'.format(self._auth_token)
 
-        return requests.get(
+        response = requests.get(
            urljoin(API_BASE_URL, endpoint),
            params=params,
            headers=headers,
         )
+        response.raise_for_status()
+        return response.json()
 
 
     def _post(self, endpoint, data=None, headers=None):
@@ -58,51 +57,65 @@ class ListenBrainz:
             headers = {}
         if self._auth_token:
             headers['Authorization'] = 'Token {}'.format(self._auth_token)
-        return requests.post(
+        response = requests.post(
            urljoin(API_BASE_URL, endpoint),
            data=data,
            headers=headers,
         )
+        response.raise_for_status()
+        return response.json()
 
 
-    def submit_listens(
+    def set_auth_token(self, auth_token):
+        if self.is_token_valid(auth_token):
+            self._auth_token = auth_token
+        else:
+            raise Exception("Invalid Auth token") #TODO
+
+
+    def _post_submit_listens(
         self,
         listens,
         listen_type,
     ):
-        self.require_auth_token()
+        self._require_auth_token()
         _validate_submit_listens_payload(listen_type, listens)
         listen_payload = [listen.to_submit_payload() for listen in listens]
         submit_json = {
             'listen_type': listen_type,
             'payload': listen_payload
         }
-
-        response = self._post(
+        return self._post(
             '/1/submit-listens',
             data=json.dumps(submit_json),
         )
-        response.raise_for_status() #TODO(param): Raise proper pylistenbrainz exceptions here
-        return response.json()
+
+
+    def submit_multiple_listens(self, listens):
+        return self._post_submit_listens(listens, LISTEN_TYPE_IMPORT)
+
+
+    def submit_single_listen(self, listen):
+        return self._post_submit_listens([listen], LISTEN_TYPE_SINGLE)
+
+
+    def submit_playing_now(self, listen):
+        return self._post_submit_listens([listen], LISTEN_TYPE_PLAYING_NOW)
 
 
     def is_token_valid(self, token):
-        response = self._get(
+        data = self._get(
             '/1/validate-token',
             params={'token': token},
         )
-        response.raise_for_status() #TODO(param): Raise proper pylistenbrainz exceptions here
-        return response.json()['valid']
+        return data['valid']
 
 
     def get_playing_now(self, username):
-        response = self._get('/1/{username}/playing-now'.format(username=username))
-        response.raise_for_status() #TODO(param): Raise proper pylistenbrainz exceptions here
-        data = response.json()
-        username = data['payload']['musicbrainz_id']
+        data = self._get('/1/user/{username}/playing-now'.format(username=username))
         listens = data['payload']['listens']
         if len(listens) > 0: # should never be greater than 1
-            return _convert_api_payload_to_listen(listens[0], username)
+            return _convert_api_payload_to_listen(listens[0])
         return None
 
 
@@ -115,12 +128,9 @@ class ListenBrainz:
         if count is not None:
             params['count'] = count
 
-        response = self._get(
-            '/1/{username}/listens'.format(username=username),
+        data = self._get(
+            '/1/user/{username}/listens'.format(username=username),
             params=params,
         )
-        response.raise_for_status() #TODO(param): Raise proper pylistenbrainz exceptions here
-        data = response.json()
-        username = data['payload']['musicbrainz_id']
         listens = data['payload']['listens']
-        return [_convert_api_payload_to_listen(listen_data, username) for listen_data in listens]
+        return [_convert_api_payload_to_listen(listen_data) for listen_data in listens]
