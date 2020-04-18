@@ -166,3 +166,42 @@ class ListenBrainzClientTestCase(unittest.TestCase):
             '/1/user/iliekcomputers/playing-now',
         )
         self.assertIsNone(received_listen)
+
+    @mock.patch('pylistenbrainz.client.requests.post')
+    @mock.patch('pylistenbrainz.client.json.dumps')
+    def test_submit_single_listen(self, mock_json_dumps, mock_requests_post):
+        ts = int(time.time())
+        listen = pylistenbrainz.Listen(
+            track_name="Fade",
+            artist_name="Kanye West",
+            release_name="The Life of Pablo",
+            listened_at=ts,
+        )
+
+        expected_payload = {
+            'listen_type': 'single',
+            'payload': [
+                {
+                    'listened_at': ts,
+                    'track_metadata': {
+                        'track_name': 'Fade',
+                        'artist_name': 'Kanye West',
+                        'release_name': 'The Life of Pablo',
+                    }
+                }
+            ]
+        }
+
+        mock_json_dumps.return_value = "mock data to be sent"
+        mock_requests_post.return_value.json.return_value = {'status': 'ok'}
+        auth_token = str(uuid.uuid4())
+        self.client.is_token_valid = mock.MagicMock(return_value=True)
+        self.client.set_auth_token(auth_token)
+        response = self.client.submit_single_listen(listen)
+        mock_requests_post.assert_called_once_with(
+            'https://api.listenbrainz.org/1/submit-listens',
+            data="mock data to be sent",
+            headers={'Authorization': 'Token {}'.format(auth_token)},
+        )
+        mock_json_dumps.assert_called_once_with(expected_payload)
+        self.assertEqual(response['status'], 'ok')
