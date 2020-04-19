@@ -254,7 +254,7 @@ class ListenBrainz:
         :param count: the number of listens to return. Defaults to 25, maximum is 100.
         :type count: int, optional
         :return: A list of listens for the user `username`
-        :rtype: Listen[pylistenbrainz.Listen]
+        :rtype: List[pylistenbrainz.Listen]
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         """
         params = {}
