@@ -109,7 +109,13 @@ Support
 You can ask questions about how to use pylistenbrainz on IRC (freenode #metabrainz).
 You can also email me at iliekcomputers [at] gmail [dot] com.
 
-If you have found a bug or have a feature request, let me know by opening a GitHub Issue.
+If you have found a bug or have a feature request,
+let me know by opening a `GitHub Issue <https://github.com/paramsingh/pylistenbrainz/issues>`_.
+
+License
+#######
+
+https://github.com/paramsingh/pylistenbrainz/blob/master/LICENSE
 
 
 Table Of Contents
