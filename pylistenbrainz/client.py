@@ -16,6 +16,7 @@
 
 import json
 import requests
+import time
 
 from pylistenbrainz import errors
 from pylistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
@@ -30,10 +31,46 @@ class ListenBrainz:
     def __init__(self):
         self._auth_token = None
 
+        # initialize rate limit variables with None
+        self._last_request_ts = None
+        self.remaining_requests = None
+        self.ratelimit_reset_in = None
+
 
     def _require_auth_token(self):
         if not self._auth_token:
             raise errors.AuthTokenRequiredException
+
+
+    def _wait_until_rate_limit(self):
+        # if we haven't made any request before this, return
+        if self._last_request_ts is None:
+            return
+
+        # if we have available requests in this window, return
+        if self.remaining_requests and self.remaining_requests > 0:
+            return
+
+        # if we don't have available requests and we know when the
+        # window is reset, backoff until the window gets reset
+        if self.ratelimit_reset_in is not None:
+            reset_ts = self._last_request_ts + self.ratelimit_reset_in
+            current_ts = int(time.time())
+            if current_ts < reset_ts:
+                time.sleep(reset_ts - current_ts)
+
+
+    def _update_rate_limit_variables(self, response):
+        self._last_request_ts = int(time.time())
+        try:
+            self.remaining_requests = int(response.headers.get('X-RateLimit-Remaining'))
+        except (TypeError, ValueError):
+            self.remaining_requests = None
+
+        try:
+            self.ratelimit_reset_in = int(response.headers.get('X-RateLimit-Reset-In'))
+        except (TypeError, ValueError):
+            self.ratelimit_reset_in = None
 
 
     def _get(self, endpoint, params=None, headers=None):
@@ -45,11 +82,13 @@ class ListenBrainz:
             headers['Authorization'] = 'Token {}'.format(self._auth_token)
 
         try:
+            self._wait_until_rate_limit()
             response = requests.get(
                 urljoin(API_BASE_URL, endpoint),
                 params=params,
                 headers=headers,
             )
+            self._update_rate_limit_variables(response)
             response.raise_for_status()
         except requests.HTTPError as e:
             status_code = e.response.status_code
@@ -72,11 +111,13 @@ class ListenBrainz:
         if self._auth_token:
             headers['Authorization'] = 'Token {}'.format(self._auth_token)
         try:
+            self._wait_until_rate_limit()
             response = requests.post(
                 urljoin(API_BASE_URL, endpoint),
                 data=data,
                 headers=headers,
             )
+            self._update_rate_limit_variables(response)
             response.raise_for_status()
         except requests.HTTPError as e:
             status_code = e.response.status_code
