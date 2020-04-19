@@ -134,17 +134,10 @@ class ListenBrainz:
         return response.json()
 
 
-    def set_auth_token(self, auth_token):
-        if self.is_token_valid(auth_token):
-            self._auth_token = auth_token
-        else:
-            raise errors.InvalidAuthTokenException
-
-
     def _post_submit_listens(self, listens, listen_type):
         self._require_auth_token()
         _validate_submit_listens_payload(listen_type, listens)
-        listen_payload = [listen.to_submit_payload() for listen in listens]
+        listen_payload = [listen._to_submit_payload() for listen in listens]
         submit_json = {
             'listen_type': listen_type,
             'payload': listen_payload
@@ -155,19 +148,73 @@ class ListenBrainz:
         )
 
 
+    def set_auth_token(self, auth_token, check_validity=True):
+        """
+        Give the client an auth_token to use for future requests.
+        This is required if the client wishes to submit listens. Each user
+        has a unique auth token and the auth token is used to identify the user
+        whose data is being submitted.
+
+        :param auth_token: auth token
+        :type auth_token: str
+        :param check_validity: specify whether we should check the validity
+            of the auth token by making a request to ListenBrainz before setting it (defaults to True)
+        :type check_validity: bool, optional
+        :raises InvalidAuthTokenException: if ListenBrainz tells us that the token is invalid
+        :raises ListenBrainzAPIException: if there is an error with the validity check API call
+        """
+        if not check_validity or self.is_token_valid(auth_token):
+            self._auth_token = auth_token
+        else:
+            raise errors.InvalidAuthTokenException
+
+
     def submit_multiple_listens(self, listens):
+        """ Submit a list of listens to ListenBrainz.
+
+        Requires that the auth token for the user whose listens are being submitted has been set.
+
+        :param listens: the list of listens to be submitted
+        :type listens: List[pylistenbrainz.Listen]
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        :raises InvalidSubmitListensPayloadException: if the listens sent are invalid, see exception message for details
+        """
         return self._post_submit_listens(listens, LISTEN_TYPE_IMPORT)
 
 
     def submit_single_listen(self, listen):
+        """ Submit a single listen to ListenBrainz.
+
+        Requires that the auth token for the user whose data is being submitted has been set.
+
+        :param listen: the listen to be submitted
+        :type listen: pylistenbrainz.Listen
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        :raises InvalidSubmitListensPayloadException: if the listen being sent is invalid, see exception message for details
+        """
         return self._post_submit_listens([listen], LISTEN_TYPE_SINGLE)
 
 
     def submit_playing_now(self, listen):
+        """ Submit a playing now notification to ListenBrainz.
+
+        Requires that the auth token for the user whose data is being submitted has been set.
+
+        :param listen: the listen to be submitted, the listen should NOT have a `listened_at` attribute
+        :type listen: pylistenbrainz.Listen
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        :raises InvalidSubmitListensPayloadException: if the listen being sent is invalid, see exception message for details
+        """
         return self._post_submit_listens([listen], LISTEN_TYPE_PLAYING_NOW)
 
 
     def is_token_valid(self, token):
+        """ Check if the specified ListenBrainz auth token is valid using the ``/1/validate-token`` endpoint.
+
+        :param token: the auth token that needs to be checked for validity
+        :type token: str
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        """
         data = self._get(
             '/1/validate-token',
             params={'token': token},
@@ -176,6 +223,14 @@ class ListenBrainz:
 
 
     def get_playing_now(self, username):
+        """ Get the listen being played right now for user `username`.
+
+        :param username: the username of the user whose data is to be fetched
+        :type username: str
+        :return: A single listen if the user is playing something currently, else None
+        :rtype: `pylistenbrainz.Listen` or `None`
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        """
         data = self._get('/1/user/{username}/playing-now'.format(username=username))
         listens = data['payload']['listens']
         if len(listens) > 0: # should never be greater than 1
@@ -184,6 +239,24 @@ class ListenBrainz:
 
 
     def get_listens(self, username, max_ts=None, min_ts=None, count=None):
+        """ Get listens for user `username`
+
+        If none of the optional arguments are given, this endpoint will return the 25 most recent listens.
+        The optional `max_ts` and `min_ts` UNIX epoch timestamps control at which point in time to start returning listens.
+        You may specify max_ts or min_ts, but not both in one call.
+
+        :param username: the username of the user whose data is to be fetched
+        :type username: str
+        :param max_ts: If you specify a max_ts timestamp, listens with listened_at less than (but not including) this value will be returned.
+        :type max_ts: int, optional
+        :param min_ts: If you specify a min_ts timestamp, listens with listened_at greater than (but not including) this value will be returned.
+        :type min_ts: int, optional
+        :param count: the number of listens to return. Defaults to 25, maximum is 100.
+        :type count: int, optional
+        :return: A list of listens for the user `username`
+        :rtype: Listen[pylistenbrainz.Listen]
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        """
         params = {}
         if max_ts is not None:
             params['max_ts'] = max_ts

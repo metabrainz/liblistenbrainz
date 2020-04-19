@@ -30,7 +30,7 @@ def _validate_submit_listens_payload(listen_type, listens):
 
     if listen_type == LISTEN_TYPE_PLAYING_NOW:
         if listens[0].listened_at is not None:
-            raise errors.ListenedAtInPlayingNowException
+            raise errors.ListenedAtInPlayingNowException("There is a listened_at field in a listen meant to be sent as `playing_now`")
 
 
 def _convert_api_payload_to_listen(data):
@@ -45,7 +45,7 @@ def _convert_api_payload_to_listen(data):
         artist_mbids=additional_info.get('artist_mbids', []),
         release_mbid=additional_info.get('release_mbid'),
         tags=additional_info.get('tags', []),
-        release_group_mbids=additional_info.get('release_group_mbids', []),
+        release_group_mbid=additional_info.get('release_group_mbid'),
         work_mbids=additional_info.get('work_mbids', []),
         tracknumber=additional_info.get('tracknumber'),
         spotify_id=additional_info.get('spotify_id'),

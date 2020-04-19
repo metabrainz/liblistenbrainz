@@ -35,7 +35,7 @@ class Listen:
         artist_mbids=None,
         release_mbid=None,
         tags=None,
-        release_group_mbids=None,
+        release_group_mbid=None,
         work_mbids=None,
         tracknumber=None,
         spotify_id=None,
@@ -44,6 +44,48 @@ class Listen:
         additional_info=None,
         username=None
     ):
+        """ Creates a Listen.
+
+        Needs at least a track name and an artist name.
+
+        :param track_name: the name of the track
+        :type track_name: str
+        :param artist_name: the name of the artist
+        :type artist_name: str
+        :param listened_at: the unix timestamp at which the user listened to this listen
+        :type listened_at: int, optional
+        :param release_name: the name of the MusicBrainz release the track is a part of
+        :type release_name: str, optional
+        :param recording_mbid: the MusicBrainz ID of this listen's recording
+        :type recording_mbid: str, optional
+        :param artist_mbids: the MusicBrainz IDs of this listen's artists
+        :type artist_mbids: List[str], optional
+        :param release_mbid: the MusicBrainz ID of this listen's release
+        :type release_mbid: str, optional
+        :param tags: a list of user defined tags for this recording, each listen can only have at most 50
+            tags and each tag must be shorter than 64 characters.
+        :type tags: List[str], optional
+        :param release_group_mbid: A MusicBrainz Release Group ID of the release group this
+            recording was played from.
+        :type release_group_mbid: str, optional
+        :param work_mbids: A list of MusicBrainz Work IDs that may be associated with this recording.
+        :type work_mbids: List[str], optional
+        :param tracknumber: The tracknumber of the recording. This first recording on a release is tracknumber 1.
+        :type tracknumber: int, optional
+        :param spotify_id: The Spotify track URL associated with this
+            recording. e.g.: http://open.spotify.com/track/1rrgWMXGCGHru5bIRxGFV0
+        :type spotify_id: str, optional
+        :param listening_from: the source of the listen, for example: 'spotify' or 'vlc',
+        :type listening_from: str, optional
+        :param isrc: The ISRC code associated with the recording.
+        :type isrc: str, optional
+        :param additional_info: a dict containing any additional fields that should be submitted with the listen.
+        :type additional_info: dict, optional
+        :param username: the username of the user to whom this listen belongs
+        :type username: str, optional
+        :return: A listen object with the passed properties
+        :rtype: Listen
+        """
         self.listened_at = listened_at
         self.track_name = track_name
         self.artist_name = artist_name
@@ -52,7 +94,7 @@ class Listen:
         self.artist_mbids = artist_mbids if artist_mbids else []
         self.release_mbid = release_mbid
         self.tags = tags if tags else []
-        self.release_group_mbids = release_group_mbids if release_group_mbids else []
+        self.release_group_mbid = release_group_mbid if release_group_mbid else []
         self.work_mbids = work_mbids if work_mbids else []
         self.tracknumber = tracknumber
         self.spotify_id = spotify_id
@@ -62,7 +104,7 @@ class Listen:
         self.username = username
 
 
-    def to_submit_payload(self):
+    def _to_submit_payload(self):
         # create the additional_info dict first
         additional_info = self.additional_info
         if self.recording_mbid:
@@ -73,8 +115,8 @@ class Listen:
             additional_info['release_mbid'] = self.release_mbid
         if self.tags:
             additional_info['tags'] = self.tags
-        if self.release_group_mbids:
-            additional_info['release_group_mbids'] = self.release_group_mbids
+        if self.release_group_mbid:
+            additional_info['release_group_mbid'] = self.release_group_mbid
         if self.work_mbids:
             additional_info['work_mbids'] = self.work_mbids
         if self.tracknumber is not None:
