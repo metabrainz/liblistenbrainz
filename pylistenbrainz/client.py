@@ -228,7 +228,7 @@ class ListenBrainz:
         :param username: the username of the user whose data is to be fetched
         :type username: str
         :return: A single listen if the user is playing something currently, else None
-        :rtype: `pylistenbrainz.Listen` or `None`
+        :rtype: pylistenbrainz.Listen or None
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         """
         data = self._get('/1/user/{username}/playing-now'.format(username=username))
