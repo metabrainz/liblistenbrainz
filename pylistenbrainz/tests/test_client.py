@@ -21,6 +21,7 @@ import time
 import unittest
 import uuid
 
+from pylistenbrainz import errors
 from unittest import mock
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testdata')
@@ -205,3 +206,53 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         )
         mock_json_dumps.assert_called_once_with(expected_payload)
         self.assertEqual(response['status'], 'ok')
+
+    def test_submit_payload_exceptions(self):
+        ts = int(time.time())
+        listen = pylistenbrainz.Listen(
+            track_name="Fade",
+            artist_name="Kanye West",
+            release_name="The Life of Pablo",
+            listened_at=ts,
+        )
+
+        # check that it doesn't try to submit without an auth token
+        with self.assertRaises(errors.AuthTokenRequiredException):
+            self.client.submit_multiple_listens([listen])
+
+        # now, we set an auth token
+        auth_token = str(uuid.uuid4())
+        self.client.is_token_valid = mock.MagicMock(return_value=True)
+        self.client.set_auth_token(auth_token)
+
+        # check that we don't allow submission of zero listens
+        with self.assertRaises(errors.EmptyPayloadException):
+            self.client.submit_multiple_listens([])
+
+        # test that we check for validity of listen types
+        with self.assertRaises(errors.UnknownListenTypeException):
+            self.client._post_submit_listens([listen], 'unknown listen type')
+
+        # test that we don't allow submission of multiple listens
+        # with the "single" or "playing now" types
+        with self.assertRaises(errors.TooManyListensException):
+            self.client._post_submit_listens([listen, listen], 'single')
+
+        with self.assertRaises(errors.TooManyListensException):
+            self.client._post_submit_listens([listen, listen], 'playing_now')
+
+        # test that we don't submit timestamps for playingnow listens
+        with self.assertRaises(errors.ListenedAtInPlayingNowException):
+            self.client.submit_playing_now(listen)
+
+    def test_set_auth_token_invalid_token(self):
+        self.client.is_token_valid = mock.MagicMock(return_value=False)
+
+        with self.assertRaises(errors.InvalidAuthTokenException):
+            self.client.set_auth_token(str(uuid.uuid4()))
+
+    def test_set_auth_token_valid_token(self):
+        self.client.is_token_valid = mock.MagicMock(return_value=True)
+        auth_token = str(uuid.uuid4())
+        self.client.set_auth_token(auth_token)
+        self.assertEqual(auth_token, self.client._auth_token)

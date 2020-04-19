@@ -17,6 +17,7 @@
 import json
 import requests
 
+from pylistenbrainz import errors
 from pylistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
 from pylistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
 from urllib.parse import urljoin
@@ -32,7 +33,7 @@ class ListenBrainz:
 
     def _require_auth_token(self):
         if not self._auth_token:
-            raise Exception("No Auth token") #TODO
+            raise errors.AuthTokenRequiredException
 
 
     def _get(self, endpoint, params=None, headers=None):
@@ -70,14 +71,10 @@ class ListenBrainz:
         if self.is_token_valid(auth_token):
             self._auth_token = auth_token
         else:
-            raise Exception("Invalid Auth token") #TODO
+            raise errors.InvalidAuthTokenException
 
 
-    def _post_submit_listens(
-        self,
-        listens,
-        listen_type,
-    ):
+    def _post_submit_listens(self, listens, listen_type):
         self._require_auth_token()
         _validate_submit_listens_payload(listen_type, listens)
         listen_payload = [listen.to_submit_payload() for listen in listens]

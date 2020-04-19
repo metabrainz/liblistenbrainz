@@ -14,22 +14,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from pylistenbrainz import errors
 from pylistenbrainz.listen import Listen
 from pylistenbrainz.listen import LISTEN_TYPES, LISTEN_TYPE_SINGLE, LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW
 
 def _validate_submit_listens_payload(listen_type, listens):
     if not listens:
-        raise Exception #TODO
+        raise errors.EmptyPayloadException("Can't submit empty list of listens")
 
     if listen_type not in LISTEN_TYPES:
-        raise Exception #TODO: make this more specific
+        raise errors.UnknownListenTypeException("Invalid listen type: %s" % str(listen_type))
 
     if listen_type != LISTEN_TYPE_IMPORT and len(listens) != 1:
-        raise Exception #TODO
+        raise errors.TooManyListensException("Too many listens for listen type %s: %d" % (str(listen_type), len(listens)))
 
     if listen_type == LISTEN_TYPE_PLAYING_NOW:
         if listens[0].listened_at is not None:
-            raise Exception #TODO
+            raise errors.ListenedAtInPlayingNowException
 
 
 def _convert_api_payload_to_listen(data):
