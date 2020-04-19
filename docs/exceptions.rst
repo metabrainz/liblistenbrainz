@@ -1,4 +1,4 @@
-pylistenbrainz Exceptions
+Exceptions
 =========================
 
 .. automodule:: pylistenbrainz.errors
