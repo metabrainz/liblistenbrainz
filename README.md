@@ -38,6 +38,9 @@ client.set_auth_token(auth_token)
 response = client.submit_single_listen(listen)
 ```
 
+More detailed documentation is available
+at [Read The Docs](https://pylistenbrainz.readthedocs.io/en/latest/).
+
 ## Features
 
 pylistenbrainz provides easy access to all ListenBrainz endpoints, handles
