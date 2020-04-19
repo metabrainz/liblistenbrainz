@@ -44,12 +44,25 @@ class ListenBrainz:
         if self._auth_token:
             headers['Authorization'] = 'Token {}'.format(self._auth_token)
 
-        response = requests.get(
-           urljoin(API_BASE_URL, endpoint),
-           params=params,
-           headers=headers,
-        )
-        response.raise_for_status()
+        try:
+            response = requests.get(
+                urljoin(API_BASE_URL, endpoint),
+                params=params,
+                headers=headers,
+            )
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            status_code = e.response.status_code
+
+            # get message from the json in the response if possible
+            try:
+                message = e.response.json().get('error', '')
+            except Exception:
+                message = None
+            raise errors.ListenBrainzAPIException(
+                status_code=status_code,
+                message=message
+            )
         return response.json()
 
 
@@ -58,12 +71,25 @@ class ListenBrainz:
             headers = {}
         if self._auth_token:
             headers['Authorization'] = 'Token {}'.format(self._auth_token)
-        response = requests.post(
-           urljoin(API_BASE_URL, endpoint),
-           data=data,
-           headers=headers,
-        )
-        response.raise_for_status()
+        try:
+            response = requests.post(
+                urljoin(API_BASE_URL, endpoint),
+                data=data,
+                headers=headers,
+            )
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            status_code = e.response.status_code
+
+            # get message from the json in the response if possible
+            try:
+                message = e.response.json().get('error', '')
+            except Exception:
+                message = None
+            raise errors.ListenBrainzAPIException(
+                status_code=status_code,
+                message=message
+            )
         return response.json()
 
 

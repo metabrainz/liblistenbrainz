@@ -17,6 +17,7 @@
 import json
 import os
 import pylistenbrainz
+import requests
 import time
 import unittest
 import uuid
@@ -256,3 +257,39 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         auth_token = str(uuid.uuid4())
         self.client.set_auth_token(auth_token)
         self.assertEqual(auth_token, self.client._auth_token)
+
+    @mock.patch('pylistenbrainz.client.requests.post')
+    def test_post_api_exceptions(self, mock_requests_post):
+        response = mock.MagicMock()
+        response.json.return_value = {'code': 401, 'error': 'Unauthorized'}
+        response.raise_for_status.side_effect = requests.HTTPError(response=response)
+        mock_requests_post.return_value = response
+
+        # set auth token
+        self.client.is_token_valid = mock.MagicMock(return_value=True)
+        auth_token = str(uuid.uuid4())
+        self.client.set_auth_token(auth_token)
+
+        # create a listen
+        ts = int(time.time())
+        listen = pylistenbrainz.Listen(
+            track_name="Fade",
+            artist_name="Kanye West",
+            release_name="The Life of Pablo",
+            listened_at=ts,
+        )
+
+        # assert that submitting it raises a ListenBrainzAPIException
+        with self.assertRaises(errors.ListenBrainzAPIException):
+            self.client.submit_single_listen(listen)
+
+    @mock.patch('pylistenbrainz.client.requests.get')
+    def test_get_api_exceptions(self, mock_requests_get):
+        response = mock.MagicMock()
+        response.json.return_value = {'code': 401, 'error': 'Unauthorized'}
+        response.raise_for_status.side_effect = requests.HTTPError(response=response)
+        mock_requests_get.return_value = response
+
+        # assert that getting listens raises a ListenBrainzAPIException
+        with self.assertRaises(errors.ListenBrainzAPIException):
+            self.client.get_listens('iliekcomputers')
