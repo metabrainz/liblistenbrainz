@@ -18,9 +18,12 @@ import json
 import requests
 import time
 
+from datetime import datetime
+from enum import Enum
 from pylistenbrainz import errors
 from pylistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
 from pylistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
+from pylistenbrainz.user_artist_stat_response import UserArtistStatRecord, UserArtistStatResponse, StatsTimeRangeOptions
 from urllib.parse import urljoin
 
 
@@ -102,6 +105,8 @@ class ListenBrainz:
                 status_code=status_code,
                 message=message
             )
+        if response.status_code == 204:
+            raise errors.ListenBrainzAPIException(status_code=204)
         return response.json()
 
 
@@ -271,3 +276,54 @@ class ListenBrainz:
         )
         listens = data['payload']['listens']
         return [_convert_api_payload_to_listen(listen_data) for listen_data in listens]
+
+    def get_user_artists(self, username, count=25, offset=0, time_range=StatsTimeRangeOptions.ALL_TIME):
+        """ Get artists for user 'username', sorted in descending order of listen count.
+
+        :param username: the username of the user whose artists are to be fetched.
+        :type username: str
+
+        :param count: the number of artists to fetch, defaults to 25, maximum is 100.
+        :type count: int, optional
+
+        :param offset: the number of artists to skip from the beginning, for pagination, defaults to 0.
+        :type offset: int, optional
+
+        :param time_range: the time range, ListenBrainz currently only supports all time.
+        :type time_range: StatsTimeRangeOptions
+
+        :return: the artists listened to by the user in the time range with listen counts and other data
+        :rtype: UserArtistStatResponse
+        """
+        params = {
+            'count': count,
+            'offset': offset,
+            'range': time_range.value,
+        }
+
+        print(params)
+
+        try:
+            data = self._get('/1/stats/user/{}/artists'.format(username), params=params)
+        except errors.ListenBrainzAPIException as e:
+            if e.status_code == 204:
+                return None
+            else:
+                raise
+
+        artist_records = []
+        for record in data['payload']['artists']:
+            artist_records.append(UserArtistStatRecord(
+                listen_count=record['listen_count'],
+                artist_name=record['artist_name'],
+                artist_msid=record.get('artist_msid'),
+                artist_mbids=record.get('artist_mbids', [])
+            ))
+
+        return UserArtistStatResponse(
+            username=data['payload']['user_id'],
+            total_artist_count=data['payload']['total_artist_count'],
+            time_range=data['payload']['range'],
+            last_updated=datetime.utcfromtimestamp(data['payload']['last_updated']),
+            artists=artist_records,
+        )
