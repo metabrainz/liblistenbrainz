@@ -23,9 +23,14 @@ from enum import Enum
 from pylistenbrainz import errors
 from pylistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
 from pylistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
-from pylistenbrainz.user_artist_stat_response import UserArtistStatRecord, UserArtistStatResponse, StatsTimeRangeOptions
 from urllib.parse import urljoin
 
+STATS_SUPPORTED_TIME_RANGES = (
+    'all_time',
+    'year',
+    'month',
+    'week',
+)
 
 API_BASE_URL = 'https://api.listenbrainz.org'
 
@@ -246,7 +251,7 @@ class ListenBrainz:
     def get_listens(self, username, max_ts=None, min_ts=None, count=None):
         """ Get listens for user `username`
 
-        If none of the optional arguments are given, this endpoint will return the 25 most recent listens.
+        If none of the optional arguments are given, this function will return the 25 most recent listens.
         The optional `max_ts` and `min_ts` UNIX epoch timestamps control at which point in time to start returning listens.
         You may specify max_ts or min_ts, but not both in one call.
 
@@ -277,7 +282,26 @@ class ListenBrainz:
         listens = data['payload']['listens']
         return [_convert_api_payload_to_listen(listen_data) for listen_data in listens]
 
-    def get_user_artists(self, username, count=25, offset=0, time_range=StatsTimeRangeOptions.ALL_TIME):
+    def _get_user_entity(self, username, entity, count=25, offset=0, time_range='all_time'):
+        if time_range not in STATS_SUPPORTED_TIME_RANGES:
+            raise errors.ListenBrainzException("Invalid time range: %s" % time_range)
+
+        params = {
+            'count': count,
+            'offset': offset,
+            'range': time_range,
+        }
+
+        try:
+            return self._get('/1/stats/user/{}/{}'.format(username, entity), params=params)
+        except errors.ListenBrainzAPIException as e:
+            if e.status_code == 204:
+                return None
+            else:
+                raise
+
+
+    def get_user_artists(self, username, count=25, offset=0, time_range='all_time'):
         """ Get artists for user 'username', sorted in descending order of listen count.
 
         :param username: the username of the user whose artists are to be fetched.
@@ -289,41 +313,52 @@ class ListenBrainz:
         :param offset: the number of artists to skip from the beginning, for pagination, defaults to 0.
         :type offset: int, optional
 
-        :param time_range: the time range, ListenBrainz currently only supports all time.
-        :type time_range: StatsTimeRangeOptions
+        :param time_range: the time range, can be 'all_time', 'month', 'week' or 'year'
+        :type time_range: str
 
-        :return: the artists listened to by the user in the time range with listen counts and other data
-        :rtype: UserArtistStatResponse
+        :return: the artists listened to by the user in the time range with listen counts and other data in the same format as the API response
+        :rtype: dict
         """
-        params = {
-            'count': count,
-            'offset': offset,
-            'range': time_range.value,
-        }
+        return self._get_user_entity(username, 'artists', count, offset, time_range)
 
-        print(params)
 
-        try:
-            data = self._get('/1/stats/user/{}/artists'.format(username), params=params)
-        except errors.ListenBrainzAPIException as e:
-            if e.status_code == 204:
-                return None
-            else:
-                raise
+    def get_user_recordings(self, username, count=25, offset=0, time_range='all_time'):
+        """ Get recordings for user 'username', sorted in descending order of listen count.
 
-        artist_records = []
-        for record in data['payload']['artists']:
-            artist_records.append(UserArtistStatRecord(
-                listen_count=record['listen_count'],
-                artist_name=record['artist_name'],
-                artist_msid=record.get('artist_msid'),
-                artist_mbids=record.get('artist_mbids', [])
-            ))
+        :param username: the username of the user whose artists are to be fetched.
+        :type username: str
 
-        return UserArtistStatResponse(
-            username=data['payload']['user_id'],
-            total_artist_count=data['payload']['total_artist_count'],
-            time_range=data['payload']['range'],
-            last_updated=datetime.utcfromtimestamp(data['payload']['last_updated']),
-            artists=artist_records,
-        )
+        :param count: the number of recordings to fetch, defaults to 25, maximum is 100.
+        :type count: int, optional
+
+        :param offset: the number of recordings to skip from the beginning, for pagination, defaults to 0.
+        :type offset: int, optional
+
+        :param time_range: the time range, can be 'all_time', 'month', 'week' or 'year'
+        :type time_range: str
+
+        :return: the recordings listened to by the user in the time range with listen counts and other data, in the same format as the API response
+        :rtype: dict
+        """
+        return self._get_user_entity(username, 'recordings', count, offset, time_range)
+
+
+    def get_user_releases(self, username, count=25, offset=0, time_range='all_time'):
+        """ Get releases for user 'username', sorted in descending order of listen count.
+
+        :param username: the username of the user whose releases are to be fetched.
+        :type username: str
+
+        :param count: the number of releases to fetch, defaults to 25, maximum is 100.
+        :type count: int, optional
+
+        :param offset: the number of releases to skip from the beginning, for pagination, defaults to 0.
+        :type offset: int, optional
+
+        :param time_range: the time range, can be 'all_time', 'month', 'week' or 'year'
+        :type time_range: str
+
+        :return: the releases listened to by the user in the time range with listen counts and other data
+        :rtype: dict
+        """
+        return self._get_user_entity(username, 'releases', count, offset, time_range)
