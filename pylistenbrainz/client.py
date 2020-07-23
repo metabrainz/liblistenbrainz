@@ -362,3 +362,40 @@ class ListenBrainz:
         :rtype: dict
         """
         return self._get_user_entity(username, 'releases', count, offset, time_range)
+
+
+    def get_user_recommendation_recordings(self, username, artist_type='top', count=25, offset=0):
+        """ Get recommended recordings for a user.
+
+        :param username: the username of the user whose recommended tracks are to be fetched.
+        :type username: str
+
+        :param artist_type: The type of filtering applied to the recommended tracks. 
+                            'top' for filtering by top artists or
+                            'similar' for filtering by similar artists
+        :type artist_type: str
+
+        :param count: the number of recordings to fetch, defaults to 25, maximum is 100.
+        :type count: int, optional
+
+        :param offset: the number of releases to skip from the beginning, for pagination, defaults to 0.
+        :type offset: int, optional
+
+        :return: the recommended recordings as other data returned by the API
+        :rtype: dict
+        """
+
+        if artist_type not in ('top', 'similar'):
+            raise ValueError("artist_type must be either top or similar.")
+        params = {
+                    'artist_type': artist_type,
+                    'count': count,
+                    'offset': offset
+                 }
+        try:
+            return self._get('/1/cf/recommendation/user/{}/recording'.format(username), params=params)
+        except errors.ListenBrainzAPIException as e:
+            if e.status_code == 204:
+                return None
+            else:
+                raise
