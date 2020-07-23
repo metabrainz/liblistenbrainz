@@ -370,8 +370,9 @@ class ListenBrainz:
         :param username: the username of the user whose recommended tracks are to be fetched.
         :type username: str
 
-        :param artist_type: The type of filtering applied to the recommended tracks. Only
-                            'top' is currently supported.
+        :param artist_type: The type of filtering applied to the recommended tracks. 
+                            'top' for filtering by top artists or
+                            'similar' for filtering by similar artists
         :type artist_type: str
 
         :param count: the number of recordings to fetch, defaults to 25, maximum is 100.
@@ -384,7 +385,8 @@ class ListenBrainz:
         :rtype: dict
         """
 
-        assert artist_type == 'top'
+        if artist_type not in ('top', 'similar'):
+            raise ValueError("artist_type must be either top or similar.")
         params = {
                     'artist_type': artist_type,
                     'count': count,

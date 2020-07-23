@@ -298,15 +298,29 @@ class ListenBrainzClientTestCase(unittest.TestCase):
     @mock.patch('pylistenbrainz.client.requests.get')
     def test_get_user_recommendation_recordings(self, mock_requests_get):
         mock_requests_get.return_value = mock.MagicMock()
-        self.client._get('/1/cf/recommendation/user/iliekcomputers/recording', params={
-                         'artist_type':'top',
-                         'offset': 3,
-                         'count': 2
-                         })
+        with self.assertRaises(ValueError):
+            self.client.get_user_recommendation_recordings("boo", "bad artist type")
+
+        mock_requests_get.reset_mock()
+        mock_requests_get.return_value = mock.MagicMock()
+        self.client.get_user_recommendation_recordings("iliekcomputers", "top", offset=3, count=2)
         mock_requests_get.assert_called_once_with(
             'https://api.listenbrainz.org/1/cf/recommendation/user/iliekcomputers/recording',
             params={
                     'artist_type': 'top',
+                    'count': 2,
+                    'offset': 3
+                   },
+            headers={},
+        )
+
+        mock_requests_get.reset_mock()
+        mock_requests_get.return_value = mock.MagicMock()
+        self.client.get_user_recommendation_recordings("iliekcomputers", "similar", offset=3, count=2)
+        mock_requests_get.assert_called_once_with(
+            'https://api.listenbrainz.org/1/cf/recommendation/user/iliekcomputers/recording',
+            params={
+                    'artist_type': 'similar',
                     'count': 2,
                     'offset': 3
                    },
