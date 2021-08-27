@@ -399,3 +399,20 @@ class ListenBrainz:
                 return None
             else:
                 raise
+
+    def get_user_listen_count(self, username):
+        """ Get total number of listens for user
+        
+        :param username: The username of the user whose listens are to be fetched
+        :type username: str
+        
+        :return: Number of listens returned by the Listenbrainz API
+        :rtype: int
+        """ 
+        try:
+            return self._get('/1/user/{}/listen-count'.format(username))['payload']['count']
+        except errors.ListenBrainzAPIException as e:
+            if e.status_code == 204:
+                return None
+            else:
+                raise
