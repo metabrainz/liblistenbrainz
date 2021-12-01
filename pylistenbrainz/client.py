@@ -26,11 +26,17 @@ from pylistenbrainz.utils import _validate_submit_listens_payload, _convert_api_
 from urllib.parse import urljoin
 
 STATS_SUPPORTED_TIME_RANGES = (
-    'all_time',
-    'year',
-    'month',
     'week',
+    'month',
+    'quarter',
+    'half_yearly',
+    'year',
+    'all_time',
+    'this_week',
+    'this_month',
+    'this_year'
 )
+
 
 API_BASE_URL = 'https://api.listenbrainz.org'
 
