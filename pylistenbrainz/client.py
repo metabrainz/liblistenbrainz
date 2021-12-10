@@ -112,6 +112,8 @@ class ListenBrainz:
                 message = e.response.json().get('error', '')
             except Exception:
                 message = None
+
+            message += " (on URL %s)" % response.url
             raise errors.ListenBrainzAPIException(
                 status_code=status_code,
                 message=message
