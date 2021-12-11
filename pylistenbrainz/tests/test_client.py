@@ -326,3 +326,14 @@ class ListenBrainzClientTestCase(unittest.TestCase):
                    },
             headers={},
         )
+
+    def test_get_user_listen_count(self):
+        self.client._get = mock.MagicMock()
+
+        test_response = {"payload":{"count":111487}}
+        self.client._get.return_value = test_response
+        returned_count = self.client.get_user_listen_count('iliekcomputers')
+        self.client._get.assert_called_once_with('/1/user/iliekcomputers/listen-count')
+        
+        self.assertEqual(returned_count, test_response['payload']['count'])
+
