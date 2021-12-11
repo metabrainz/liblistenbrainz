@@ -26,7 +26,7 @@ copyright = '2020, Param Singh'
 author = 'Param Singh'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = pylistenbrainz.__version__
 
 
 # -- General configuration ---------------------------------------------------
