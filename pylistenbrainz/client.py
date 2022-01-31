@@ -22,6 +22,9 @@ from datetime import datetime
 from enum import Enum
 from pylistenbrainz import errors
 from pylistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
+from pylistenbrainz.playlist import PlaylistMetadata
+from pylistenbrainz.playlist import _playlist_metadata_from_response, _playlist_from_response
+from pylistenbrainz.playlist import PLAYLIST_QUERY_TYPE_CREATED_BY, PLAYLIST_QUERY_TYPE_COLLABORATOR, PLAYLIST_QUERY_TYPE_CREATED_FOR
 from pylistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
 from urllib.parse import urljoin
 
@@ -422,3 +425,53 @@ class ListenBrainz:
                 return None
             else:
                 raise
+
+    def get_user_playlists(self, username, query_type=PLAYLIST_QUERY_TYPE_CREATED_BY, count=25, offset=0):
+        """ List all playlists for user
+
+        By default this returns playlists created by the user. The ``query_type``
+        parameter can return several things:
+
+            * ``PLAYLIST_QUERY_TYPE_CREATED_BY``: playlists the user owns (default)
+            * ``PLAYLIST_QUERY_TYPE_COLLABORATOR``: any playlist where the user contributed
+            * ``PLAYLIST_QUERY_TYPE_CREATED_FOR``: playlists created for the user (includes generated recommendations)
+
+        This returns the playlist metadata. To retrieve the contents of the
+        playlist, see: :func:`get_playlist`.
+
+        :param username: the username of the user whose playlists are to be fetched.
+        :type username: str
+
+        :param query_type: type of playlists to fetch
+
+        :param count: the number of playlists to fetch, defaults to 25, maximum is 100.
+        :type count: int, optional
+
+        :param offset: the number of playlists to skip from the beginning, for pagination, defaults to 0.
+        :type offset: int, optional
+
+        :return: a list of :class:`PlaylistMetadata` instances
+        :rtype: list
+        """
+        if query_type == PLAYLIST_QUERY_TYPE_COLLABORATOR:
+            endpoint = '/1/user/{}/playlists/collaborator'.format(username)
+        elif query_type == PLAYLIST_QUERY_TYPE_CREATED_FOR:
+            endpoint = '/1/user/{}/playlists/createdfor'.format(username)
+        else:
+            endpoint = '/1/user/{}/playlists'.format(username)
+        data = self._get(endpoint)
+        playlists = data['playlists']
+        return [_playlist_metadata_from_response(item) for item in playlists]
+
+    def get_playlist(self, mbid):
+        """ Fetch a specific playlist by its identifier.
+
+        You will usually call :func:`get_user_playlists` and use
+        :meth:`.PlaylistMetadata.identifier` to get the MBID of playlists you
+        are interested in.
+
+        :return: a :class:`.Playlist` instance
+        :rtype: Playlist
+        """
+        data = self._get('/1/playlist/{mbid}'.format(mbid=mbid))
+        return _playlist_from_response(data)
