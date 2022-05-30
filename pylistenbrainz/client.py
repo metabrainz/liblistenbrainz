@@ -379,6 +379,7 @@ class ListenBrainz:
         :param artist_type: The type of filtering applied to the recommended tracks. 
                             'top' for filtering by top artists or
                             'similar' for filtering by similar artists
+                            'raw' for no filtering
         :type artist_type: str
 
         :param count: the number of recordings to fetch, defaults to 25, maximum is 100.
@@ -391,8 +392,8 @@ class ListenBrainz:
         :rtype: dict
         """
 
-        if artist_type not in ('top', 'similar'):
-            raise ValueError("artist_type must be either top or similar.")
+        if artist_type not in ('top', 'similar', 'raw'):
+            raise ValueError("artist_type must be either top or similar or raw.")
         params = {
                     'artist_type': artist_type,
                     'count': count,
