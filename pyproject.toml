@@ -17,7 +17,6 @@ include = [
     { path = "docs", format = "sdist" },
     { path = "examples", format = "sdist" },
     { path = "tests", format = "sdist" },
-    
 ]
 
 [tool.poetry.dependencies]
