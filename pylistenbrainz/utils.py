@@ -29,9 +29,8 @@ def _validate_submit_listens_payload(listen_type, listens):
     if listen_type != LISTEN_TYPE_IMPORT and len(listens) != 1:
         raise errors.TooManyListensException("Too many listens for listen type %s: %d" % (str(listen_type), len(listens)))
 
-    if listen_type == LISTEN_TYPE_PLAYING_NOW:
-        if listens[0].listened_at is not None:
-            raise errors.ListenedAtInPlayingNowException("There is a listened_at field in a listen meant to be sent as `playing_now`")
+    if listen_type == LISTEN_TYPE_PLAYING_NOW and listens[0].listened_at is not None:
+        raise errors.ListenedAtInPlayingNowException("There is a listened_at field in a listen meant to be sent as `playing_now`")
 
 
 def _convert_api_payload_to_listen(data):
