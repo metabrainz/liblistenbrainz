@@ -10,6 +10,15 @@ classifiers=[
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent",
 ]
+packages = [
+	{ include = "pylistenbrainz" },
+]
+include = [
+    { path = "docs", format = "sdist" },
+    { path = "examples", format = "sdist" },
+    { path = "tests", format = "sdist" },
+    
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
