@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "pylistenbrainz"
+version = "0.5.0"
+description = "A simple ListenBrainz client library for Python"
+authors = ["Param Singh <iliekcomputers@gmail.com>"]
+license = "GPL-3.0-only"
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+requests = "^2.28.0"
+
+# Optional dependencies
+Sphinx = {version = "^5.0.2", optional = true}
+
+[tool.poetry.dev-dependencies]
+pytest-cov = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.urls]
+"Homepage" = "https://github.com/paramsingh/pylistenbrainz"
+"Bug Tracker" = "https://github.com/metabrainz/pylistenbrainz/issues"
+
+[tool.poetry.extras]
+docs = ["Sphinx",]
+
+[tool.coverage.run]
+source = ["pylistenbrainz"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.pytest.ini_options]
+addopts = ["--cov"]
