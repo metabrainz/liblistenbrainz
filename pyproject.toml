@@ -3,7 +3,7 @@ name = "pylistenbrainz"
 version = "0.5.0"
 description = "A simple ListenBrainz client library for Python"
 authors = ["Param Singh <iliekcomputers@gmail.com>"]
-license = "GPL-3.0-only"
+license = "GPL-3.0-or-later"
 readme = "README.md"
 classifiers=[
     "Programming Language :: Python :: 3",
