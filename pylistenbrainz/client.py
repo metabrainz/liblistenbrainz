@@ -135,7 +135,7 @@ class ListenBrainz:
             response.raise_for_status()
         except requests.HTTPError as e:
             status_code = e.response.status_code
-            
+
             # get message from the json in the response if possible
             try:
                 message = e.response.json().get('error', '')
