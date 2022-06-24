@@ -112,10 +112,8 @@ class ListenBrainz:
                 message = e.response.json().get('error', '')
             except Exception:
                 message = None
-            raise errors.ListenBrainzAPIException(
-                status_code=status_code,
-                message=message
-            )
+            raise errors.ListenBrainzAPIException(status_code=status_code, message=message) from e
+
         if response.status_code == 204:
             raise errors.ListenBrainzAPIException(status_code=204)
         return response.json()
@@ -137,16 +135,14 @@ class ListenBrainz:
             response.raise_for_status()
         except requests.HTTPError as e:
             status_code = e.response.status_code
-
+            
             # get message from the json in the response if possible
             try:
                 message = e.response.json().get('error', '')
             except Exception:
                 message = None
-            raise errors.ListenBrainzAPIException(
-                status_code=status_code,
-                message=message
-            )
+            raise errors.ListenBrainzAPIException(status_code=status_code, message=message) from e
+
         return response.json()
 
 
