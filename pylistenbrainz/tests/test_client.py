@@ -51,7 +51,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         mock_requests_get.assert_called_once_with(
             'https://api.listenbrainz.org/1/user/iliekcomputers/listens',
             params={},
-            headers={'Authorization': 'Token {}'.format(auth_token)},
+            headers={'Authorization': f'Token {auth_token}'}
         )
 
 
@@ -73,7 +73,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         mock_requests_post.assert_called_once_with(
             'https://api.listenbrainz.org/1/user/iliekcomputers/listens',
             data=None,
-            headers={'Authorization': 'Token {}'.format(auth_token)},
+            headers={'Authorization': f'Token {auth_token}'}
         )
 
 
@@ -203,7 +203,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         mock_requests_post.assert_called_once_with(
             'https://api.listenbrainz.org/1/submit-listens',
             data="mock data to be sent",
-            headers={'Authorization': 'Token {}'.format(auth_token)},
+            headers={'Authorization': f'Token {auth_token}'}
         )
         mock_json_dumps.assert_called_once_with(expected_payload)
         self.assertEqual(response['status'], 'ok')

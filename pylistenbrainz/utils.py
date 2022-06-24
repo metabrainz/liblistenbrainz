@@ -23,7 +23,8 @@ def _validate_submit_listens_payload(listen_type, listens):
         raise errors.EmptyPayloadException("Can't submit empty list of listens")
 
     if listen_type not in LISTEN_TYPES:
-        raise errors.UnknownListenTypeException("Invalid listen type: %s" % str(listen_type))
+        raise errors.UnknownListenTypeException(f"Invalid listen type: {str(listen_type)}")
+
 
     if listen_type != LISTEN_TYPE_IMPORT and len(listens) != 1:
         raise errors.TooManyListensException("Too many listens for listen type %s: %d" % (str(listen_type), len(listens)))

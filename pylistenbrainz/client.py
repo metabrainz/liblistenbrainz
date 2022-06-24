@@ -93,7 +93,7 @@ class ListenBrainz:
         if not headers:
             headers = {}
         if self._auth_token:
-            headers['Authorization'] = 'Token {}'.format(self._auth_token)
+            headers['Authorization'] = f'Token {self._auth_token}'
 
         try:
             self._wait_until_rate_limit()
@@ -125,7 +125,7 @@ class ListenBrainz:
         if not headers:
             headers = {}
         if self._auth_token:
-            headers['Authorization'] = 'Token {}'.format(self._auth_token)
+            headers['Authorization'] = f'Token {self._auth_token}'
         try:
             self._wait_until_rate_limit()
             response = requests.post(
@@ -290,7 +290,7 @@ class ListenBrainz:
 
     def _get_user_entity(self, username, entity, count=25, offset=0, time_range='all_time'):
         if time_range not in STATS_SUPPORTED_TIME_RANGES:
-            raise errors.ListenBrainzException("Invalid time range: %s" % time_range)
+            raise errors.ListenBrainzException(f"Invalid time range: {time_range}")
 
         params = {
             'count': count,
@@ -299,7 +299,7 @@ class ListenBrainz:
         }
 
         try:
-            return self._get('/1/stats/user/{}/{}'.format(username, entity), params=params)
+            return self._get(f'/1/stats/user/{username}/{entity}', params=params)
         except errors.ListenBrainzAPIException as e:
             if e.status_code == 204:
                 return None
@@ -400,7 +400,8 @@ class ListenBrainz:
                     'offset': offset
                  }
         try:
-            return self._get('/1/cf/recommendation/user/{}/recording'.format(username), params=params)
+            return self._get(f'/1/cf/recommendation/user/{username}/recording', params=params)
+
         except errors.ListenBrainzAPIException as e:
             if e.status_code == 204:
                 return None
@@ -417,7 +418,7 @@ class ListenBrainz:
         :rtype: int
         """ 
         try:
-            return self._get('/1/user/{}/listen-count'.format(username))['payload']['count']
+            return self._get(f'/1/user/{username}/listen-count')['payload']['count']
         except errors.ListenBrainzAPIException as e:
             if e.status_code == 204:
                 return None
