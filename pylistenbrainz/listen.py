@@ -91,16 +91,16 @@ class Listen:
         self.artist_name = artist_name
         self.release_name = release_name
         self.recording_mbid = recording_mbid
-        self.artist_mbids = artist_mbids if artist_mbids else []
+        self.artist_mbids = artist_mbids or []
         self.release_mbid = release_mbid
-        self.tags = tags if tags else []
-        self.release_group_mbid = release_group_mbid if release_group_mbid else []
-        self.work_mbids = work_mbids if work_mbids else []
+        self.tags = tags or []
+        self.release_group_mbid = release_group_mbid or []
+        self.work_mbids = work_mbids or []
         self.tracknumber = tracknumber
         self.spotify_id = spotify_id
         self.listening_from = listening_from
         self.isrc = isrc
-        self.additional_info = additional_info if additional_info else {}
+        self.additional_info = additional_info or {}
         self.username = username
 
 
