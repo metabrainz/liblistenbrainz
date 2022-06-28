@@ -23,4 +23,6 @@ setuptools.setup(
     install_requires=[
         'requests >= 2.23.0',
     ],
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
 )
