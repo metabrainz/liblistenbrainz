@@ -20,6 +20,7 @@ setuptools.setup(
     python_requires='>=3.5',
     install_requires=[
         'requests >= 2.23.0',
+        'importlib-metadata>=3.10.0;python_version<"3.10"',
     ],
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
