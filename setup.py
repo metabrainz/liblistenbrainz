@@ -1,12 +1,10 @@
 import setuptools
-import pylistenbrainz
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="pylistenbrainz",
-    version=pylistenbrainz.__version__,
     author="Param Singh",
     author_email="iliekcomputers@gmail.com",
     description="A simple ListenBrainz client library for Python",
@@ -22,5 +20,8 @@ setuptools.setup(
     python_requires='>=3.5',
     install_requires=[
         'requests >= 2.23.0',
+        'importlib-metadata>=3.10.0;python_version<"3.10"',
     ],
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
 )
