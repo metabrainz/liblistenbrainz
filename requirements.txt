@@ -1,4 +1,4 @@
-requests == 2.23.0
+requests == 2.31.0
 pytest == 5.4.1
 pytest-cov == 2.8.1
 sphinx == 3.0.1
