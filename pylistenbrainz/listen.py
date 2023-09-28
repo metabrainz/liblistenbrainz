@@ -42,6 +42,7 @@ class Listen:
         listening_from=None,
         isrc=None,
         additional_info=None,
+        mbid_mapping=None,
         username=None
     ):
         """ Creates a Listen.
@@ -101,6 +102,7 @@ class Listen:
         self.listening_from = listening_from
         self.isrc = isrc
         self.additional_info = additional_info or {}
+        self.mbid_mapping = mbid_mapping or {}
         self.username = username
 
 
@@ -109,10 +111,6 @@ class Listen:
         additional_info = self.additional_info
         if self.recording_mbid:
             additional_info['recording_mbid'] = self.recording_mbid
-        if self.artist_mbids:
-            additional_info['artist_mbids'] = self.artist_mbids
-        if self.release_mbid:
-            additional_info['release_mbid'] = self.release_mbid
         if self.tags:
             additional_info['tags'] = self.tags
         if self.release_group_mbid:
@@ -127,6 +125,13 @@ class Listen:
             additional_info['listening_from'] = self.listening_from
         if self.isrc:
             additional_info['isrc'] = self.isrc
+
+        # create the mbid_mapping dict first
+        mbid_mapping = self.mbid_mapping
+        if self.artist_mbids:
+            mbid_mapping['artist_mbids'] = self.artist_mbids
+        if self.release_mbid:
+            mbid_mapping['release_mbid'] = self.release_mbid
 
         # create track_metadata now and put additional_info into it if it makes sense
         track_metadata = {

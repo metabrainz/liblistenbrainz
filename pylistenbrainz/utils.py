@@ -36,14 +36,15 @@ def _validate_submit_listens_payload(listen_type, listens):
 def _convert_api_payload_to_listen(data):
     track_metadata = data['track_metadata']
     additional_info = track_metadata.get('additional_info', {})
+    mbid_mapping = track_metadata.get('mbid_mapping', {})
     return Listen(
         track_name=track_metadata['track_name'],
         artist_name=track_metadata['artist_name'],
         listened_at=data.get('listened_at'),
         release_name=track_metadata.get('release_name'),
         recording_mbid=additional_info.get('recording_mbid'),
-        artist_mbids=additional_info.get('artist_mbids', []),
-        release_mbid=additional_info.get('release_mbid'),
+        artist_mbids=mbid_mapping.get('artist_mbids', []),
+        release_mbid=mbid_mapping.get('release_mbid'),
         tags=additional_info.get('tags', []),
         release_group_mbid=additional_info.get('release_group_mbid'),
         work_mbids=additional_info.get('work_mbids', []),
@@ -52,5 +53,6 @@ def _convert_api_payload_to_listen(data):
         listening_from=additional_info.get('listening_from'),
         isrc=additional_info.get('isrc'),
         additional_info=additional_info,
+        mbid_mapping=mbid_mapping,
         username=data.get('username'),
     )
