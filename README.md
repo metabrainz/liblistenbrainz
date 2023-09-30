@@ -57,7 +57,7 @@ Install or upgrade pylistenbrainz with:
 
 ## Support
 
-You can ask questions about how to use pylistenbrainz on IRC (freenode #metabrainz).
+You can ask questions about how to use pylistenbrainz on IRC (Libera.Chat #metabrainz).
 You can also email me at `iliekcomputers [at] gmail [dot] com`.
 
 If you have found a bug or have a feature request, let me know by opening an issue (or a pull request).
