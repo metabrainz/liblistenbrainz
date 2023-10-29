@@ -42,7 +42,8 @@ class Listen:
         listening_from=None,
         isrc=None,
         additional_info=None,
-        username=None
+        username=None,
+        recording_msid=None,
     ):
         """ Creates a Listen.
 
@@ -83,6 +84,8 @@ class Listen:
         :type additional_info: dict, optional
         :param username: the username of the user to whom this listen belongs
         :type username: str, optional
+        :param recording_msid: the MSID of this listen's recording
+        :type recording_msid: str, optional
         :return: A listen object with the passed properties
         :rtype: Listen
         """
@@ -102,6 +105,7 @@ class Listen:
         self.isrc = isrc
         self.additional_info = additional_info or {}
         self.username = username
+        self.recording_msid = recording_msid
 
 
     def _to_submit_payload(self):
