@@ -53,4 +53,5 @@ def _convert_api_payload_to_listen(data):
         isrc=additional_info.get('isrc'),
         additional_info=additional_info,
         username=data.get('username'),
+        recording_msid=data.get('recording_msid'),
     )

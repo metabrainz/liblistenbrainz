@@ -220,6 +220,32 @@ class ListenBrainz:
         return self._post_submit_listens([listen], LISTEN_TYPE_PLAYING_NOW)
 
 
+    def delete_listen(self, listen):
+        """ Delete a particular listen from a user’s listen history.
+
+        The listen is not deleted immediately, but is scheduled for deletion, which usually happens shortly after the hour.
+
+        Requires that the auth token for the user whose data is being submitted has been set.
+
+        :param listen: the listen to be deleted. The listen must have a `listened_at` and `recording_msid` attribute
+        :type listen: pylistenbrainz.Listen
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        :raises InvalidSubmitListensPayloadException: if the listen being sent is invalid, see exception message for details
+        """
+        data = {
+            'listened_at': listen.listened_at,
+            'recording_msid': listen.recording_msid,
+        }
+        headers = {
+            'Content-Type': 'application/json',
+        }
+        return self._post(
+            '/1/delete-listen',
+            data=json.dumps(data),
+            headers=headers,
+        )
+
+
     def is_token_valid(self, token):
         """ Check if the specified ListenBrainz auth token is valid using the ``/1/validate-token`` endpoint.
 
@@ -372,7 +398,7 @@ class ListenBrainz:
         :param username: the username of the user whose recommended tracks are to be fetched.
         :type username: str
 
-        :param artist_type: The type of filtering applied to the recommended tracks. 
+        :param artist_type: The type of filtering applied to the recommended tracks.
                             'top' for filtering by top artists or
                             'similar' for filtering by similar artists
                             'raw' for no filtering
@@ -406,13 +432,13 @@ class ListenBrainz:
 
     def get_user_listen_count(self, username):
         """ Get total number of listens for user
-        
+
         :param username: The username of the user whose listens are to be fetched
         :type username: str
-        
+
         :return: Number of listens returned by the Listenbrainz API
         :rtype: int
-        """ 
+        """
         try:
             return self._get(f'/1/user/{username}/listen-count')['payload']['count']
         except errors.ListenBrainzAPIException as e:
