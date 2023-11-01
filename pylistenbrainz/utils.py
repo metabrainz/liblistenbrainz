@@ -55,4 +55,5 @@ def _convert_api_payload_to_listen(data):
         additional_info=additional_info,
         mbid_mapping=mbid_mapping,
         username=data.get('username'),
+        recording_msid=data.get('recording_msid'),
     )
