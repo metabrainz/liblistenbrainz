@@ -43,6 +43,7 @@ class Listen:
         isrc=None,
         additional_info=None,
         mbid_mapping=None,
+        username=None,
         recording_msid=None,
     ):
         """ Creates a Listen.
