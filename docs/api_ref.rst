@@ -24,6 +24,32 @@ The ``Listen`` class  represents a Listen from ListenBrainz.
     :undoc-members:
     :show-inheritance:
 
+Playlists module
+################
+
+The following classes represent ListenBrainz playlists.
+
+class Playlist
+~~~~~~~~~~~~~~
+
+.. autoclass:: pylistenbrainz.Playlist
+    :members:
+    :undoc-members:
+
+class PlaylistMetadata
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: pylistenbrainz.PlaylistMetadata
+    :members:
+    :undoc-members:
+
+class PlaylistTrack
+~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: pylistenbrainz.PlaylistTrack
+    :members:
+    :undoc-members:
+
 Statistics (beta)
 #################
 
