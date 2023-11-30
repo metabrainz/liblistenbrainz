@@ -219,6 +219,27 @@ class ListenBrainz:
         """
         return self._post_submit_listens([listen], LISTEN_TYPE_PLAYING_NOW)
 
+    def submit_feedback(self, feedback, recording_mbid):
+        """ Submit a feedback to Listenbrainz
+            
+        Requires that the auth token for the user whose data is being submitted has been set.
+
+        :param feedback The type of feedback 1 = loved, -1 = hated, 0 = delete feedback if any
+        :param recording_mbid The recording Musicbrainz If of the track receiving the feedback
+        """
+        data = {
+            'score': feedback,
+            'recording_mbid': recording_mbid,
+        }
+        headers = {
+            'Content-Type': 'application/json',
+        }
+        return self._post(
+            '/1/feedback/recording-feedback',
+            data=json.dumps(data),
+            headers=headers,
+        )
+
 
     def delete_listen(self, listen):
         """ Delete a particular listen from a user’s listen history.
@@ -441,6 +462,19 @@ class ListenBrainz:
         """
         try:
             return self._get(f'/1/user/{username}/listen-count')['payload']['count']
+        except errors.ListenBrainzAPIException as e:
+            if e.status_code == 204:
+                return None
+            else:
+                raise
+
+    def get_user_feedback(self, username):
+        """ Get feedback given by user
+        
+        :param username The user to get the feedbacks from
+        """
+        try:
+            return self._get(f'/1/feedback/user/{username}/get-feedback',)
         except errors.ListenBrainzAPIException as e:
             if e.status_code == 204:
                 return None
