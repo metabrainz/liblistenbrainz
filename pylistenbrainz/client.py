@@ -219,13 +219,13 @@ class ListenBrainz:
         """
         return self._post_submit_listens([listen], LISTEN_TYPE_PLAYING_NOW)
 
-    def submit_feedback(self, feedback, recording_mbid):
+    def submit_user_feedback(self, feedback, recording_mbid):
         """ Submit a feedback to Listenbrainz
             
         Requires that the auth token for the user whose data is being submitted has been set.
 
         :param feedback The type of feedback 1 = loved, -1 = hated, 0 = delete feedback if any
-        :param recording_mbid The recording Musicbrainz If of the track receiving the feedback
+        :param recording_mbid The recording Musicbrainz Id of the track being anotated
         """
         data = {
             'score': feedback,
