@@ -468,13 +468,28 @@ class ListenBrainz:
             else:
                 raise
 
-    def get_user_feedback(self, username):
+    def get_user_feedback(self, username, score, metadata, count=100, offset=0 ):
         """ Get feedback given by user
         
-        :param username The user to get the feedbacks from
+        :param username: The user to get the feedbacks from
+        :type username: str
+        :param count: Optional, number of feedback items to return. Default 100.
+        :type count: int, optional
+        :param offset:  Optional, number of feedback items to skip from the beginning, for pagination. Ex. An offset of 5 means the top 5 feedback will be skipped, defaults to 0.
+        :type offset: int, optional
+        :param score: Optional, If 1 then returns the loved recordings, if -1 returns hated recordings.
+        :type score: int, optional
+        :param metadata: Optional, boolean if this call should return the metadata for the feedback.
+        :type metadata: bool, optional
         """
+        params = {
+                    'count': count,
+                    'offset': offset,
+                    'score': score,
+                    'metadata': metadata,
+                 }
         try:
-            return self._get(f'/1/feedback/user/{username}/get-feedback',)
+            return self._get(f'/1/feedback/user/{username}/get-feedback', params=params)
         except errors.ListenBrainzAPIException as e:
             if e.status_code == 204:
                 return None
