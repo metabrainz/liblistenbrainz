@@ -42,6 +42,7 @@ class Listen:
         listening_from=None,
         isrc=None,
         additional_info=None,
+        mbid_mapping=None,
         username=None,
         recording_msid=None,
     ):
@@ -104,6 +105,7 @@ class Listen:
         self.listening_from = listening_from
         self.isrc = isrc
         self.additional_info = additional_info or {}
+        self.mbid_mapping = mbid_mapping or {}
         self.username = username
         self.recording_msid = recording_msid
 
