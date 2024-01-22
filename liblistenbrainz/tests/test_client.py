@@ -1,4 +1,4 @@
-# pylistenbrainz - A simple client library for ListenBrainz
+# liblistenbrainz - A simple client library for ListenBrainz
 # Copyright (C) 2020 Param Singh <iliekcomputers@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,13 +16,13 @@
 
 import json
 import os
-import pylistenbrainz
+import liblistenbrainz
 import requests
 import time
 import unittest
 import uuid
 
-from pylistenbrainz import errors
+from liblistenbrainz import errors
 from unittest import mock
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testdata')
@@ -31,9 +31,9 @@ TEST_DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testd
 class ListenBrainzClientTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.client = pylistenbrainz.ListenBrainz()
+        self.client = liblistenbrainz.ListenBrainz()
 
-    @mock.patch('pylistenbrainz.client.requests.get')
+    @mock.patch('liblistenbrainz.client.requests.get')
     def test_get_injects_auth_token_if_available(self, mock_requests_get):
         mock_requests_get.return_value = mock.MagicMock()
         self.client._get('/1/user/iliekcomputers/listens')
@@ -55,7 +55,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         )
 
 
-    @mock.patch('pylistenbrainz.client.requests.post')
+    @mock.patch('liblistenbrainz.client.requests.post')
     def test_post_injects_auth_token_if_available(self, mock_requests_post):
         mock_requests_post.return_value = mock.MagicMock()
         self.client._post('/1/user/iliekcomputers/listens')
@@ -169,11 +169,11 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         )
         self.assertIsNone(received_listen)
 
-    @mock.patch('pylistenbrainz.client.requests.post')
-    @mock.patch('pylistenbrainz.client.json.dumps')
+    @mock.patch('liblistenbrainz.client.requests.post')
+    @mock.patch('liblistenbrainz.client.json.dumps')
     def test_submit_single_listen(self, mock_json_dumps, mock_requests_post):
         ts = int(time.time())
-        listen = pylistenbrainz.Listen(
+        listen = liblistenbrainz.Listen(
             track_name="Fade",
             artist_name="Kanye West",
             release_name="The Life of Pablo",
@@ -210,7 +210,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
 
     def test_submit_payload_exceptions(self):
         ts = int(time.time())
-        listen = pylistenbrainz.Listen(
+        listen = liblistenbrainz.Listen(
             track_name="Fade",
             artist_name="Kanye West",
             release_name="The Life of Pablo",
@@ -258,7 +258,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         self.client.set_auth_token(auth_token)
         self.assertEqual(auth_token, self.client._auth_token)
 
-    @mock.patch('pylistenbrainz.client.requests.post')
+    @mock.patch('liblistenbrainz.client.requests.post')
     def test_post_api_exceptions(self, mock_requests_post):
         response = mock.MagicMock()
         response.json.return_value = {'code': 401, 'error': 'Unauthorized'}
@@ -272,7 +272,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
 
         # create a listen
         ts = int(time.time())
-        listen = pylistenbrainz.Listen(
+        listen = liblistenbrainz.Listen(
             track_name="Fade",
             artist_name="Kanye West",
             release_name="The Life of Pablo",
@@ -283,7 +283,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         with self.assertRaises(errors.ListenBrainzAPIException):
             self.client.submit_single_listen(listen)
 
-    @mock.patch('pylistenbrainz.client.requests.get')
+    @mock.patch('liblistenbrainz.client.requests.get')
     def test_get_api_exceptions(self, mock_requests_get):
         response = mock.MagicMock()
         response.json.return_value = {'code': 401, 'error': 'Unauthorized'}
@@ -295,7 +295,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
             self.client.get_listens('iliekcomputers')
 
 
-    @mock.patch('pylistenbrainz.client.requests.get')
+    @mock.patch('liblistenbrainz.client.requests.get')
     def test_get_user_recommendation_recordings(self, mock_requests_get):
         mock_requests_get.return_value = mock.MagicMock()
         with self.assertRaises(ValueError):

@@ -1,4 +1,4 @@
-# pylistenbrainz - A simple client library for ListenBrainz
+# liblistenbrainz - A simple client library for ListenBrainz
 # Copyright (C) 2020 Param Singh <iliekcomputers@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from pylistenbrainz import errors
-from pylistenbrainz.listen import Listen
-from pylistenbrainz.listen import LISTEN_TYPES, LISTEN_TYPE_SINGLE, LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW
+from liblistenbrainz import errors
+from liblistenbrainz.listen import Listen
+from liblistenbrainz.listen import LISTEN_TYPES, LISTEN_TYPE_SINGLE, LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW
 
 def _validate_submit_listens_payload(listen_type, listens):
     if not listens:

@@ -1,4 +1,4 @@
-# pylistenbrainz - A simple client library for ListenBrainz
+# liblistenbrainz - A simple client library for ListenBrainz
 # Copyright (C) 2020 Param Singh <iliekcomputers@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -28,6 +28,6 @@ except PackageNotFoundError:
     # package is not installed?
     __version__ = "unknown"
 
-from pylistenbrainz.client import ListenBrainz
-from pylistenbrainz.listen import Listen
-from pylistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
+from liblistenbrainz.client import ListenBrainz
+from liblistenbrainz.listen import Listen
+from liblistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE

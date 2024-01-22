@@ -1,6 +1,6 @@
-import pylistenbrainz
+import liblistenbrainz
 
-client = pylistenbrainz.ListenBrainz()
+client = liblistenbrainz.ListenBrainz()
 listen = client.get_playing_now('iliekcomputers')
 assert listen is not None
 print("Track name:", listen.track_name)

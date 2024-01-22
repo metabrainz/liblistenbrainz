@@ -1,5 +1,5 @@
 [project]
-name = "pylistenbrainz"
+name = "liblistenbrainz"
 authors = [
   { name="Param Singh", email="iliekcomputers@gmail.com"},
 ]
@@ -31,7 +31,7 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/paramsingh/pylistenbrainz"
+Homepage = "https://github.com/metabrainz/liblistenbrainz"
 
 [build-system]
 requires = ["setuptools>=64.0", "setuptools_scm>=8"]

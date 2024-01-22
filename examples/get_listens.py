@@ -1,6 +1,6 @@
-import pylistenbrainz
+import liblistenbrainz
 
-client = pylistenbrainz.ListenBrainz()
+client = liblistenbrainz.ListenBrainz()
 listens = client.get_listens('iliekcomputers')
 for listen in listens:
     print("Track name:", listen.track_name)
