@@ -1,4 +1,4 @@
-# pylistenbrainz - A simple client library for ListenBrainz
+# liblistenbrainz - A simple client library for ListenBrainz
 # Copyright (C) 2020 Param Singh <iliekcomputers@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -20,9 +20,9 @@ import time
 
 from datetime import datetime
 from enum import Enum
-from pylistenbrainz import errors
-from pylistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
-from pylistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
+from liblistenbrainz import errors
+from liblistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
+from liblistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
 from urllib.parse import urljoin
 
 STATS_SUPPORTED_TIME_RANGES = (
@@ -187,7 +187,7 @@ class ListenBrainz:
         Requires that the auth token for the user whose listens are being submitted has been set.
 
         :param listens: the list of listens to be submitted
-        :type listens: List[pylistenbrainz.Listen]
+        :type listens: List[liblistenbrainz.Listen]
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         :raises InvalidSubmitListensPayloadException: if the listens sent are invalid, see exception message for details
         """
@@ -200,7 +200,7 @@ class ListenBrainz:
         Requires that the auth token for the user whose data is being submitted has been set.
 
         :param listen: the listen to be submitted
-        :type listen: pylistenbrainz.Listen
+        :type listen: liblistenbrainz.Listen
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         :raises InvalidSubmitListensPayloadException: if the listen being sent is invalid, see exception message for details
         """
@@ -213,7 +213,7 @@ class ListenBrainz:
         Requires that the auth token for the user whose data is being submitted has been set.
 
         :param listen: the listen to be submitted, the listen should NOT have a `listened_at` attribute
-        :type listen: pylistenbrainz.Listen
+        :type listen: liblistenbrainz.Listen
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         :raises InvalidSubmitListensPayloadException: if the listen being sent is invalid, see exception message for details
         """
@@ -249,7 +249,7 @@ class ListenBrainz:
         Requires that the auth token for the user whose data is being submitted has been set.
 
         :param listen: the listen to be deleted. The listen must have a `listened_at` and `recording_msid` attribute
-        :type listen: pylistenbrainz.Listen
+        :type listen: liblistenbrainz.Listen
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         :raises InvalidSubmitListensPayloadException: if the listen being sent is invalid, see exception message for details
         """
@@ -287,7 +287,7 @@ class ListenBrainz:
         :param username: the username of the user whose data is to be fetched
         :type username: str
         :return: A single listen if the user is playing something currently, else None
-        :rtype: pylistenbrainz.Listen or None
+        :rtype: liblistenbrainz.Listen or None
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         """
         data = self._get('/1/user/{username}/playing-now'.format(username=username))
@@ -313,7 +313,7 @@ class ListenBrainz:
         :param count: the number of listens to return. Defaults to 25, maximum is 100.
         :type count: int, optional
         :return: A list of listens for the user `username`
-        :rtype: List[pylistenbrainz.Listen]
+        :rtype: List[liblistenbrainz.Listen]
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         """
         params = {}

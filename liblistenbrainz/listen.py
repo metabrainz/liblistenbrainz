@@ -1,4 +1,4 @@
-# pylistenbrainz - A simple client library for ListenBrainz
+# liblistenbrainz - A simple client library for ListenBrainz
 # Copyright (C) 2020 Param Singh <iliekcomputers@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify

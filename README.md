@@ -1,17 +1,17 @@
-# pylistenbrainz
+# liblistenbrainz
 
-*pylistenbrainz* is a simple Python library for the
+*liblistenbrainz* is a simple Python library for the
 [ListenBrainz Web API](https://listenbrainz.readthedocs.io/en/production/dev/api/).
 
-pylistenbrainz will help you start getting data from and submitting data to
+liblistenbrainz will help you start getting data from and submitting data to
 [ListenBrainz](https://listenbrainz.org>) very quickly.
 
 Here's an example of getting the listening history of a ListenBrainz user::
 
 ``` python
-import pylistenbrainz
+import liblistenbrainz
 
-client = pylistenbrainz.ListenBrainz()
+client = liblistenbrainz.ListenBrainz()
 listens = client.get_listens(username='iliekcomputers')
 for listen in listens:
     print("Track name:", listen.track_name)
@@ -21,43 +21,43 @@ for listen in listens:
 Here's another quick example of how to submit a listen to ListenBrainz::
 
 ``` python
-import pylistenbrainz
+import liblistenbrainz
 import time
 
 auth_token = input('Please enter your auth token: ')
 
-listen = pylistenbrainz.Listen(
+listen = liblistenbrainz.Listen(
     track_name="Fade",
     artist_name="Kanye West",
     release_name="The Life of Pablo",
     listened_at=int(time.time()),
 )
 
-client = pylistenbrainz.ListenBrainz()
+client = liblistenbrainz.ListenBrainz()
 client.set_auth_token(auth_token)
 response = client.submit_single_listen(listen)
 ```
 
 More detailed documentation is available
-at [Read The Docs](https://pylistenbrainz.readthedocs.io/en/latest/).
+at [Read The Docs](https://liblistenbrainz.readthedocs.io/en/latest/).
 
 ## Features
 
-pylistenbrainz provides easy access to all ListenBrainz endpoints, handles
+liblistenbrainz provides easy access to all ListenBrainz endpoints, handles
 ratelimits automatically and supports the ListenBrainz authorization flow.
 
-For details on the API endpoints that can be used via pylistenbrainz, take
+For details on the API endpoints that can be used via liblistenbrainz, take
 a look at the [ListenBrainz API Documentation](https://listenbrainz.readthedocs.io/en/production/dev/api/).
 
 ## Installation
 
-Install or upgrade pylistenbrainz with:
+Install or upgrade liblistenbrainz with:
 
-    pip install pylistenbrainz --upgrade
+    pip install liblistenbrainz --upgrade
 
 ## Support
 
-You can ask questions about how to use pylistenbrainz on IRC (freenode #metabrainz).
+You can ask questions about how to use liblistenbrainz on IRC (freenode #metabrainz).
 You can also email me at `iliekcomputers [at] gmail [dot] com`.
 
 If you have found a bug or have a feature request, let me know by opening an issue (or a pull request).
@@ -65,7 +65,7 @@ If you have found a bug or have a feature request, let me know by opening an iss
 ## License
 
 ```
-pylistenbrainz - A simple client library for ListenBrainz
+liblistenbrainz - A simple client library for ListenBrainz
 Copyright (C) 2020 Param Singh <iliekcomputers@gmail.com>
 
 This program is free software: you can redistribute it and/or modify

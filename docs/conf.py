@@ -8,7 +8,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-import pylistenbrainz
+import liblistenbrainz
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -21,12 +21,12 @@ import pylistenbrainz
 
 # -- Project information -----------------------------------------------------
 
-project = 'pylistenbrainz'
+project = 'liblistenbrainz'
 copyright = '2020, Param Singh'
 author = 'Param Singh'
 
 # The full version, including alpha/beta/rc tags
-release = pylistenbrainz.__version__
+release = liblistenbrainz.__version__
 
 
 # -- General configuration ---------------------------------------------------

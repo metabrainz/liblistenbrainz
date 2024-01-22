@@ -1,7 +1,7 @@
 Exceptions
 =========================
 
-.. automodule:: pylistenbrainz.errors
+.. automodule:: liblistenbrainz.errors
     :members:
     :undoc-members:
     :show-inheritance:
