@@ -32,6 +32,9 @@ docs = [
 
 [project.urls]
 Homepage = "https://github.com/metabrainz/liblistenbrainz"
+Issues = "https://github.com/metabrainz/liblistenbrainz/issues"
+Documentation = "https://liblistenbrainz.readthedocs.io"
+Releases = "https://github.com/metabrainz/liblistenbrainz/releases"
 
 [build-system]
 requires = ["setuptools>=64.0", "setuptools_scm>=8"]

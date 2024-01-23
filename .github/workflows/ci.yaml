@@ -18,7 +18,7 @@ jobs:
       - name: Install
         run: pip install .[tests]
       - name: Run tests
-        run: pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=pylistenbrainz --cov-report=xml:junit/coverage-${{ matrix.python-version }}.xml
+        run: pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=liblistenbrainz --cov-report=xml:junit/coverage-${{ matrix.python-version }}.xml
       - name: Upload 
         uses: actions/upload-artifact@v4
         with:
