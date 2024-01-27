@@ -267,6 +267,34 @@ class ListenBrainz:
         )
 
 
+    def follow(self, username):
+        """ Follow a user
+
+        :param username: User to follow
+        """
+        headers = {
+            'Content-Type': 'application/json',
+        }
+        return self._post(
+            f'/1/user/{username}/follow',
+            headers=headers
+        )
+
+
+    def unfollow(self, username):
+        """ Unfollow a user
+
+        :param username: User to unfollow
+        """
+        headers = {
+            'Content-Type': 'application/json',
+        }
+        return self._post(
+            f'/1/user/{username}/unfollow'
+            headers=headers
+        )
+
+
     def is_token_valid(self, token):
         """ Check if the specified ListenBrainz auth token is valid using the ``/1/validate-token`` endpoint.
 
@@ -495,3 +523,25 @@ class ListenBrainz:
                 return None
             else:
                 raise
+
+
+    def get_user_followers(self, username):
+        """ Get followers for a user
+
+        : param username: The user to get followers for
+        """
+        try:
+            return self._get(f'/1/user/{username}/followers')
+        except errors.ListenBrainzAPIException:
+            raise
+
+
+    def get_user_following(self, username):
+        """ Get following for a user
+
+        : param username: The user to get following for
+        """
+        try:
+            return self._get(f'/1/user/{username}/following')
+        except errors.ListenBrainzAPIException:
+            raise
