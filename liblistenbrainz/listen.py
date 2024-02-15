@@ -53,7 +53,7 @@ class Listen:
         :type track_name: str
         :param artist_name: the name of the artist
         :type artist_name: str
-        :param listened_at: the unix timestamp at which the user listened to this listen
+        :param listened_at: the unix timestamp at which the user listened to this listen, in seconds
         :type listened_at: int, optional
         :param release_name: the name of the MusicBrainz release the track is a part of
         :type release_name: str, optional
