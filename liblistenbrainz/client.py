@@ -27,7 +27,7 @@ from liblistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, 
 from liblistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
 from urllib.parse import urljoin
 
-retry_strategy = Retry(total=5, status_forcelist=[429, 500, 502, 503, 504])
+retry_strategy = Retry(total=5, allowed_methods=('GET', 'POST'), status_forcelist=[429, 500, 502, 503, 504])
 adapter = HTTPAdapter(max_retries=retry_strategy)
 
 STATS_SUPPORTED_TIME_RANGES = (
@@ -133,9 +133,14 @@ class ListenBrainz:
             headers = {}
         if self._auth_token:
             headers['Authorization'] = f'Token {self._auth_token}'
+
+        session = requests.Session()
+        session.mount("http://", adapter) # http is not used, but in case someone needs to use to for dev work, its included here
+        session.mount("https://", adapter)
+
         try:
             self._wait_until_rate_limit()
-            response = requests.post(
+            response = session.post(
                 urljoin(API_BASE_URL, endpoint),
                 data=data,
                 headers=headers,

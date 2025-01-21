@@ -55,7 +55,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         )
 
 
-    @mock.patch('liblistenbrainz.client.requests.post')
+    @mock.patch('liblistenbrainz.client.requests.Session.post')
     def test_post_injects_auth_token_if_available(self, mock_requests_post):
         mock_requests_post.return_value = mock.MagicMock()
         self.client._post('/1/user/iliekcomputers/listens')
@@ -169,7 +169,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         )
         self.assertIsNone(received_listen)
 
-    @mock.patch('liblistenbrainz.client.requests.post')
+    @mock.patch('liblistenbrainz.client.requests.Session.post')
     @mock.patch('liblistenbrainz.client.json.dumps')
     def test_submit_single_listen(self, mock_json_dumps, mock_requests_post):
         ts = int(time.time())
