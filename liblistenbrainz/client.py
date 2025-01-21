@@ -16,7 +16,9 @@
 
 import json
 import requests
+from requests.adapters import HTTPAdapter
 import time
+from urllib3.util import Retry
 
 from datetime import datetime
 from enum import Enum
@@ -24,6 +26,9 @@ from liblistenbrainz import errors
 from liblistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
 from liblistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
 from urllib.parse import urljoin
+
+retry_strategy = Retry(total=5, status_forcelist=[429, 500, 502, 503, 504])
+adapter = HTTPAdapter(max_retries=retry_strategy)
 
 STATS_SUPPORTED_TIME_RANGES = (
     'week',
@@ -95,9 +100,13 @@ class ListenBrainz:
         if self._auth_token:
             headers['Authorization'] = f'Token {self._auth_token}'
 
+        session = requests.Session()
+        session.mount("http://", adapter) # http is not used, but in case someone needs to use to for dev work, its included here
+        session.mount("https://", adapter)
+
         try:
             self._wait_until_rate_limit()
-            response = requests.get(
+            response = session.get(
                 urljoin(API_BASE_URL, endpoint),
                 params=params,
                 headers=headers,
