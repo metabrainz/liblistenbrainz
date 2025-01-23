@@ -33,7 +33,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
     def setUp(self):
         self.client = liblistenbrainz.ListenBrainz()
 
-    @mock.patch('liblistenbrainz.client.requests.get')
+    @mock.patch('liblistenbrainz.client.requests.Session.get')
     def test_get_injects_auth_token_if_available(self, mock_requests_get):
         mock_requests_get.return_value = mock.MagicMock()
         self.client._get('/1/user/iliekcomputers/listens')
@@ -55,7 +55,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         )
 
 
-    @mock.patch('liblistenbrainz.client.requests.post')
+    @mock.patch('liblistenbrainz.client.requests.Session.post')
     def test_post_injects_auth_token_if_available(self, mock_requests_post):
         mock_requests_post.return_value = mock.MagicMock()
         self.client._post('/1/user/iliekcomputers/listens')
@@ -169,7 +169,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         )
         self.assertIsNone(received_listen)
 
-    @mock.patch('liblistenbrainz.client.requests.post')
+    @mock.patch('liblistenbrainz.client.requests.Session.post')
     @mock.patch('liblistenbrainz.client.json.dumps')
     def test_submit_single_listen(self, mock_json_dumps, mock_requests_post):
         ts = int(time.time())
@@ -283,7 +283,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         with self.assertRaises(errors.ListenBrainzAPIException):
             self.client.submit_single_listen(listen)
 
-    @mock.patch('liblistenbrainz.client.requests.get')
+    @mock.patch('liblistenbrainz.client.requests.Session.get')
     def test_get_api_exceptions(self, mock_requests_get):
         response = mock.MagicMock()
         response.json.return_value = {'code': 401, 'error': 'Unauthorized'}
@@ -295,7 +295,7 @@ class ListenBrainzClientTestCase(unittest.TestCase):
             self.client.get_listens('iliekcomputers')
 
 
-    @mock.patch('liblistenbrainz.client.requests.get')
+    @mock.patch('liblistenbrainz.client.requests.Session.get')
     def test_get_user_recommendation_recordings(self, mock_requests_get):
         mock_requests_get.return_value = mock.MagicMock()
         with self.assertRaises(ValueError):
