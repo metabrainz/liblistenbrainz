@@ -8,6 +8,7 @@ liblistenbrainz will help you start getting data from and submitting data to
 
 Here's an example of getting the listening history of a ListenBrainz user::
 
+
 ``` python
 import liblistenbrainz
 
