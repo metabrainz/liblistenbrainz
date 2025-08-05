@@ -20,8 +20,6 @@ from requests.adapters import HTTPAdapter
 import time
 from urllib3.util import Retry
 
-from datetime import datetime
-from enum import Enum
 from liblistenbrainz import errors
 from liblistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
 from liblistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
@@ -190,8 +188,10 @@ class ListenBrainz:
         :raises ListenBrainzAPIException: if there is an error with the validity check API call
         """
         self._auth_token = auth_token
-        if check_validity and not self.is_token_valid(auth_token):
-            raise errors.InvalidAuthTokenException
+        if check_validity:
+            response = self._get("/1/validate-token")
+            if not response["valid"]:
+                raise errors.InvalidAuthTokenException
 
 
     def submit_multiple_listens(self, listens):
@@ -278,17 +278,6 @@ class ListenBrainz:
             data=json.dumps(data),
             headers=headers,
         )
-
-
-    def is_token_valid(self, token):
-        """ Check if the specified ListenBrainz auth token is valid using the ``/1/validate-token`` endpoint.
-
-        :param token: the auth token that needs to be checked for validity
-        :type token: str
-        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
-        """
-        data = self._get('/1/validate-token')
-        return data['valid']
 
 
     def get_playing_now(self, username):
