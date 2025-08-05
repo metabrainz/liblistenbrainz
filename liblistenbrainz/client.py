@@ -189,9 +189,8 @@ class ListenBrainz:
         :raises InvalidAuthTokenException: if ListenBrainz tells us that the token is invalid
         :raises ListenBrainzAPIException: if there is an error with the validity check API call
         """
-        if not check_validity or self.is_token_valid(auth_token):
-            self._auth_token = auth_token
-        else:
+        self._auth_token = auth_token
+        if check_validity and not self.is_token_valid(auth_token):
             raise errors.InvalidAuthTokenException
 
 
@@ -288,10 +287,7 @@ class ListenBrainz:
         :type token: str
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         """
-        data = self._get(
-            '/1/validate-token',
-            params={'token': token},
-        )
+        data = self._get('/1/validate-token')
         return data['valid']
 
 
