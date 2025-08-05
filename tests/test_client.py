@@ -17,7 +17,7 @@
 import json
 import os
 import liblistenbrainz
-import requests
+import requests_mock
 import time
 import unittest
 import uuid
@@ -33,49 +33,36 @@ class ListenBrainzClientTestCase(unittest.TestCase):
     def setUp(self):
         self.client = liblistenbrainz.ListenBrainz()
 
-    @mock.patch('liblistenbrainz.client.requests.Session.get')
-    def test_get_injects_auth_token_if_available(self, mock_requests_get):
-        mock_requests_get.return_value = mock.MagicMock()
-        self.client._get('/1/user/iliekcomputers/listens')
-        mock_requests_get.assert_called_once_with(
-            'https://api.listenbrainz.org/1/user/iliekcomputers/listens',
-            params={},
-            headers={},
-        )
+    @requests_mock.Mocker()
+    def test_get_injects_auth_token_if_available(self, m):
+        m.get('https://api.listenbrainz.org/1/validate-token', json={'valid': True})
+        m.get('https://api.listenbrainz.org/1/user/iliekcomputers/listens', json={'payload': {}})
 
-        mock_requests_get.reset_mock()
-        self.client.is_token_valid = mock.MagicMock(return_value=True)
+        self.client._get('/1/user/iliekcomputers/listens')
+        self.assertEqual(m.call_count, 1)
+        self.assertNotIn('Authorization', m.last_request.headers)
+
         auth_token = str(uuid.uuid4())
         self.client.set_auth_token(auth_token)
         self.client._get('/1/user/iliekcomputers/listens')
-        mock_requests_get.assert_called_once_with(
-            'https://api.listenbrainz.org/1/user/iliekcomputers/listens',
-            params={},
-            headers={'Authorization': f'Token {auth_token}'}
-        )
+        self.assertEqual(m.call_count, 3)
+        self.assertIn('Authorization', m.last_request.headers)
+        self.assertEqual(m.last_request.headers['Authorization'], f'Token {auth_token}')
 
-
-    @mock.patch('liblistenbrainz.client.requests.Session.post')
-    def test_post_injects_auth_token_if_available(self, mock_requests_post):
-        mock_requests_post.return_value = mock.MagicMock()
+    @requests_mock.Mocker()
+    def test_post_injects_auth_token_if_available(self, m):
+        m.get('https://api.listenbrainz.org/1/validate-token', json={'valid': True})
+        m.post('https://api.listenbrainz.org/1/user/iliekcomputers/listens', json={'payload': {}})
         self.client._post('/1/user/iliekcomputers/listens')
-        mock_requests_post.assert_called_once_with(
-            'https://api.listenbrainz.org/1/user/iliekcomputers/listens',
-            data=None,
-            headers={},
-        )
+        self.assertEqual(m.call_count, 1)
+        self.assertNotIn('Authorization', m.last_request.headers)
 
-        mock_requests_post.reset_mock()
-        self.client.is_token_valid = mock.MagicMock(return_value=True)
         auth_token = str(uuid.uuid4())
         self.client.set_auth_token(auth_token)
         self.client._post('/1/user/iliekcomputers/listens')
-        mock_requests_post.assert_called_once_with(
-            'https://api.listenbrainz.org/1/user/iliekcomputers/listens',
-            data=None,
-            headers={'Authorization': f'Token {auth_token}'}
-        )
-
+        self.assertEqual(m.call_count, 3)
+        self.assertIn('Authorization', m.last_request.headers)
+        self.assertEqual(m.last_request.headers['Authorization'], f'Token {auth_token}')
 
     def test_client_get_listens(self):
         self.client._get = mock.MagicMock()
@@ -109,7 +96,6 @@ class ListenBrainzClientTestCase(unittest.TestCase):
             self.assertEqual(received_listens[i].listened_at, expected_listens[i]['listened_at'])
             self.assertEqual(received_listens[i].track_name, expected_listens[i]['track_metadata']['track_name'])
 
-
     def test_client_get_listens_with_min_ts(self):
         ts = int(time.time())
         self.client._get = mock.MagicMock()
@@ -126,7 +112,6 @@ class ListenBrainzClientTestCase(unittest.TestCase):
             self.assertEqual(received_listens[i].listened_at, expected_listens[i]['listened_at'])
             self.assertEqual(received_listens[i].track_name, expected_listens[i]['track_metadata']['track_name'])
 
-
     def test_client_get_listens_with_count(self):
         self.client._get = mock.MagicMock()
         with open(os.path.join(TEST_DATA_DIR, 'get_listens_happy_path_response.json')) as f:
@@ -142,7 +127,6 @@ class ListenBrainzClientTestCase(unittest.TestCase):
             self.assertEqual(received_listens[i].listened_at, expected_listens[i]['listened_at'])
             self.assertEqual(received_listens[i].track_name, expected_listens[i]['track_metadata']['track_name'])
 
-
     def test_client_get_playing_now(self):
         self.client._get = mock.MagicMock()
         with open(os.path.join(TEST_DATA_DIR, 'get_playing_now_happy_path_response.json')) as f:
@@ -157,7 +141,6 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         self.assertIsNone(received_listen.listened_at)
         self.assertEqual(received_listen.track_name, expected_listen['track_metadata']['track_name'])
 
-
     def test_client_get_playing_now_no_listen(self):
         self.client._get = mock.MagicMock()
         with open(os.path.join(TEST_DATA_DIR, 'no_playing_now.json')) as f:
@@ -169,9 +152,10 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         )
         self.assertIsNone(received_listen)
 
-    @mock.patch('liblistenbrainz.client.requests.Session.post')
-    @mock.patch('liblistenbrainz.client.json.dumps')
-    def test_submit_single_listen(self, mock_json_dumps, mock_requests_post):
+    @requests_mock.Mocker()
+    def test_submit_single_listen(self, m):
+        m.get('https://api.listenbrainz.org/1/validate-token', json={'valid': True})
+        m.post('https://api.listenbrainz.org/1/submit-listens', json={'status': 'ok'})
         ts = int(time.time())
         listen = liblistenbrainz.Listen(
             track_name="Fade",
@@ -194,21 +178,17 @@ class ListenBrainzClientTestCase(unittest.TestCase):
             ]
         }
 
-        mock_json_dumps.return_value = "mock data to be sent"
-        mock_requests_post.return_value.json.return_value = {'status': 'ok'}
         auth_token = str(uuid.uuid4())
-        self.client.is_token_valid = mock.MagicMock(return_value=True)
         self.client.set_auth_token(auth_token)
         response = self.client.submit_single_listen(listen)
-        mock_requests_post.assert_called_once_with(
-            'https://api.listenbrainz.org/1/submit-listens',
-            data="mock data to be sent",
-            headers={'Authorization': f'Token {auth_token}'}
-        )
-        mock_json_dumps.assert_called_once_with(expected_payload)
+        self.assertEqual(m.last_request.json(), expected_payload)
+        self.assertIn('Authorization', m.last_request.headers)
+        self.assertEqual(m.last_request.headers['Authorization'], f'Token {auth_token}')
         self.assertEqual(response['status'], 'ok')
 
-    def test_submit_payload_exceptions(self):
+    @requests_mock.Mocker()
+    def test_submit_payload_exceptions(self, m):
+        m.get('https://api.listenbrainz.org/1/validate-token', json={'valid': True})
         ts = int(time.time())
         listen = liblistenbrainz.Listen(
             track_name="Fade",
@@ -223,7 +203,6 @@ class ListenBrainzClientTestCase(unittest.TestCase):
 
         # now, we set an auth token
         auth_token = str(uuid.uuid4())
-        self.client.is_token_valid = mock.MagicMock(return_value=True)
         self.client.set_auth_token(auth_token)
 
         # check that we don't allow submission of zero listens
@@ -246,27 +225,27 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         with self.assertRaises(errors.ListenedAtInPlayingNowException):
             self.client.submit_playing_now(listen)
 
-    def test_set_auth_token_invalid_token(self):
-        self.client.is_token_valid = mock.MagicMock(return_value=False)
+    @requests_mock.Mocker()
+    def test_set_auth_token_invalid_token(self, m):
+        m.get('https://api.listenbrainz.org/1/validate-token', json={'valid': False})
 
         with self.assertRaises(errors.InvalidAuthTokenException):
             self.client.set_auth_token(str(uuid.uuid4()))
 
-    def test_set_auth_token_valid_token(self):
-        self.client.is_token_valid = mock.MagicMock(return_value=True)
+    @requests_mock.Mocker()
+    def test_set_auth_token_valid_token(self, m):
+        m.get('https://api.listenbrainz.org/1/validate-token', json={'valid': True})
         auth_token = str(uuid.uuid4())
         self.client.set_auth_token(auth_token)
         self.assertEqual(auth_token, self.client._auth_token)
 
-    @mock.patch('liblistenbrainz.client.requests.post')
-    def test_post_api_exceptions(self, mock_requests_post):
-        response = mock.MagicMock()
-        response.json.return_value = {'code': 401, 'error': 'Unauthorized'}
-        response.raise_for_status.side_effect = requests.HTTPError(response=response)
-        mock_requests_post.return_value = response
+    @requests_mock.Mocker()
+    def test_post_api_exceptions(self, m):
+        m.get('https://api.listenbrainz.org/1/validate-token', json={'valid': True})
+        m.post('https://api.listenbrainz.org/1/submit-listens', status_code=401,
+               json={'code': 401, 'error': 'Unauthorized'})
 
         # set auth token
-        self.client.is_token_valid = mock.MagicMock(return_value=True)
         auth_token = str(uuid.uuid4())
         self.client.set_auth_token(auth_token)
 
@@ -283,17 +262,14 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         with self.assertRaises(errors.ListenBrainzAPIException):
             self.client.submit_single_listen(listen)
 
-    @mock.patch('liblistenbrainz.client.requests.Session.get')
-    def test_get_api_exceptions(self, mock_requests_get):
-        response = mock.MagicMock()
-        response.json.return_value = {'code': 401, 'error': 'Unauthorized'}
-        response.raise_for_status.side_effect = requests.HTTPError(response=response)
-        mock_requests_get.return_value = response
+    @requests_mock.Mocker()
+    def test_get_api_exceptions(self, m):
+        m.get('https://api.listenbrainz.org/1/user/iliekcomputers/listens', status_code=401,
+              json={'code': 401, 'error': 'Unauthorized'})
 
         # assert that getting listens raises a ListenBrainzAPIException
         with self.assertRaises(errors.ListenBrainzAPIException):
             self.client.get_listens('iliekcomputers')
-
 
     @mock.patch('liblistenbrainz.client.requests.Session.get')
     def test_get_user_recommendation_recordings(self, mock_requests_get):
@@ -307,10 +283,10 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         mock_requests_get.assert_called_once_with(
             'https://api.listenbrainz.org/1/cf/recommendation/user/iliekcomputers/recording',
             params={
-                    'artist_type': 'top',
-                    'count': 2,
-                    'offset': 3
-                   },
+                'artist_type': 'top',
+                'count': 2,
+                'offset': 3
+            },
             headers={},
         )
 
@@ -320,20 +296,19 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         mock_requests_get.assert_called_once_with(
             'https://api.listenbrainz.org/1/cf/recommendation/user/iliekcomputers/recording',
             params={
-                    'artist_type': 'similar',
-                    'count': 2,
-                    'offset': 3
-                   },
+                'artist_type': 'similar',
+                'count': 2,
+                'offset': 3
+            },
             headers={},
         )
 
     def test_get_user_listen_count(self):
         self.client._get = mock.MagicMock()
 
-        test_response = {"payload":{"count":111487}}
+        test_response = {"payload": {"count": 111487}}
         self.client._get.return_value = test_response
         returned_count = self.client.get_user_listen_count('iliekcomputers')
         self.client._get.assert_called_once_with('/1/user/iliekcomputers/listen-count')
-        
-        self.assertEqual(returned_count, test_response['payload']['count'])
 
+        self.assertEqual(returned_count, test_response['payload']['count'])
