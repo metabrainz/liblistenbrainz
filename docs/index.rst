@@ -16,7 +16,6 @@ Here's an example of getting the listening history of a ListenBrainz user::
         print("Track name:", listen.track_name)
         print("Artist name:", listen.artist_name)
 
-
 Here's another quick example of how to submit a listen to ListenBrainz::
 
     import liblistenbrainz
@@ -40,6 +39,10 @@ Features
 
 liblistenbrainz provides easy access to all ListenBrainz endpoints, handles
 ratelimits automatically and supports the ListenBrainz authorization flow.
+
+Note that automatic rate limiting is applied to the ``liblistenbrainz.ListenBrainz()``
+client; therefore rate limits may be exceeded in cases where multiple clients are 
+initialized (resulting in 403 errors from the ListenBrainz Web API).
 
 For details on the API endpoints that can be used via liblistenbrainz, take
 a look at the `ListenBrainz API Documentation <https://listenbrainz.readthedocs.io/en/production/dev/api/>`_.
