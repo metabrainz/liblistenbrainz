@@ -16,6 +16,7 @@ Here's an example of getting the listening history of a ListenBrainz user::
         print("Track name:", listen.track_name)
         print("Artist name:", listen.artist_name)
 
+
 Here's another quick example of how to submit a listen to ListenBrainz::
 
     import liblistenbrainz
