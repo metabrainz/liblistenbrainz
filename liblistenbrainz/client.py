@@ -48,6 +48,11 @@ class ListenBrainz:
     def __init__(self, api_base_url = 'https://api.listenbrainz.org'):
         self._auth_token = None
 
+        # the trailing `/` ensures that `urljoin` appends the relative path
+        # rather than replacing the last element of any path in `api_base_url`.
+        if not api_base_url.endswith("/"):
+            api_base_url += "/"
+
         # initialize rate limit variables with None
         self._last_request_ts = None
         self.remaining_requests = None
@@ -91,6 +96,13 @@ class ListenBrainz:
             self.ratelimit_reset_in = None
 
 
+    def _urljoin(self, endpoint):
+        # ensure that urljoin sees a relative path
+        if endpoint.startswith("/"):
+            endpoint = endpoint[1:]
+        return urljoin(self.api_base_url, endpoint)
+
+
     def _get(self, endpoint, params=None, headers=None):
         if not params:
             params = {}
@@ -106,7 +118,7 @@ class ListenBrainz:
         try:
             self._wait_until_rate_limit()
             response = session.get(
-                urljoin(self.api_base_url, endpoint),
+                self._urljoin(endpoint),
                 params=params,
                 headers=headers,
             )
@@ -140,7 +152,7 @@ class ListenBrainz:
         try:
             self._wait_until_rate_limit()
             response = session.post(
-                urljoin(self.api_base_url, endpoint),
+                self._urljoin(endpoint),
                 data=data,
                 headers=headers,
             )
