@@ -312,3 +312,75 @@ class ListenBrainzClientTestCase(unittest.TestCase):
         self.client._get.assert_called_once_with('/1/user/iliekcomputers/listen-count')
 
         self.assertEqual(returned_count, test_response['payload']['count'])
+
+
+    @requests_mock.Mocker()
+    def test_get_custom_api_base_url(self, m):
+        self.client = liblistenbrainz.ListenBrainz(api_base_url="https://listenbrainz.example.net")
+
+        m.get('https://listenbrainz.example.net/1/user/iliekcomputers/listens', json={'payload': {}})
+        self.client._get('/1/user/iliekcomputers/listens')
+        self.assertEqual(m.call_count, 1)
+
+
+    @requests_mock.Mocker()
+    def test_get_custom_api_base_url_with_trailing_slash(self, m):
+        self.client = liblistenbrainz.ListenBrainz(api_base_url="https://listenbrainz.example.net/")
+
+        m.get('https://listenbrainz.example.net/1/user/iliekcomputers/listens', json={'payload': {}})
+        self.client._get('/1/user/iliekcomputers/listens')
+        self.assertEqual(m.call_count, 1)
+
+
+    @requests_mock.Mocker()
+    def test_get_custom_api_base_url_with_path(self, m):
+        self.client = liblistenbrainz.ListenBrainz(api_base_url="https://listenbrainz.example.net/subpath")
+
+        m.get('https://listenbrainz.example.net/subpath/1/user/iliekcomputers/listens', json={'payload': {}})
+        self.client._get('/1/user/iliekcomputers/listens')
+        self.assertEqual(m.call_count, 1)
+
+
+    @requests_mock.Mocker()
+    def test_get_custom_api_base_url_with_path_and_trailing_slash(self, m):
+        self.client = liblistenbrainz.ListenBrainz(api_base_url="https://listenbrainz.example.net/subpath/")
+
+        m.get('https://listenbrainz.example.net/subpath/1/user/iliekcomputers/listens', json={'payload': {}})
+        self.client._get('/1/user/iliekcomputers/listens')
+        self.assertEqual(m.call_count, 1)
+
+
+    @requests_mock.Mocker()
+    def test_post_custom_api_base_url(self, m):
+        self.client = liblistenbrainz.ListenBrainz(api_base_url="https://listenbrainz.example.net")
+
+        m.post('https://listenbrainz.example.net/1/user/iliekcomputers/listens', json={'payload': {}})
+        self.client._post('/1/user/iliekcomputers/listens')
+        self.assertEqual(m.call_count, 1)
+
+
+    @requests_mock.Mocker()
+    def test_post_custom_api_base_url_with_trailing_slash(self, m):
+        self.client = liblistenbrainz.ListenBrainz(api_base_url="https://listenbrainz.example.net/")
+
+        m.post('https://listenbrainz.example.net/1/user/iliekcomputers/listens', json={'payload': {}})
+        self.client._post('/1/user/iliekcomputers/listens')
+        self.assertEqual(m.call_count, 1)
+
+
+    @requests_mock.Mocker()
+    def test_post_custom_api_base_url_with_path(self, m):
+        self.client = liblistenbrainz.ListenBrainz(api_base_url="https://listenbrainz.example.net/subpath")
+
+        m.post('https://listenbrainz.example.net/subpath/1/user/iliekcomputers/listens', json={'payload': {}})
+        self.client._post('/1/user/iliekcomputers/listens')
+        self.assertEqual(m.call_count, 1)
+
+
+    @requests_mock.Mocker()
+    def test_post_custom_api_base_url_with_path_and_trailing_slash(self, m):
+        self.client = liblistenbrainz.ListenBrainz(api_base_url="https://listenbrainz.example.net/subpath/")
+
+        m.post('https://listenbrainz.example.net/subpath/1/user/iliekcomputers/listens', json={'payload': {}})
+        self.client._post('/1/user/iliekcomputers/listens')
+        self.assertEqual(m.call_count, 1)
