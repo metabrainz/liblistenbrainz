@@ -90,7 +90,12 @@ class ListenBrainz:
         except (TypeError, ValueError):
             self.ratelimit_reset_in = None
 
-
+    def _build_url(self, endpoint: str) -> str:
+        return urljoin(
+            self.api_base_url.rstrip("/")+"/",
+            endpoint.lstrip("/"),
+        )
+    
     def _get(self, endpoint, params=None, headers=None):
         if not params:
             params = {}
@@ -106,7 +111,7 @@ class ListenBrainz:
         try:
             self._wait_until_rate_limit()
             response = session.get(
-                urljoin(self.api_base_url, endpoint),
+                self._build_url(endpoint),
                 params=params,
                 headers=headers,
             )
@@ -140,7 +145,7 @@ class ListenBrainz:
         try:
             self._wait_until_rate_limit()
             response = session.post(
-                urljoin(self.api_base_url, endpoint),
+                self._build_url(endpoint),
                 data=data,
                 headers=headers,
             )
