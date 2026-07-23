@@ -23,7 +23,6 @@ from urllib3.util import Retry
 from liblistenbrainz import errors
 from liblistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
 from liblistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
-from urllib.parse import urljoin
 
 retry_strategy = Retry(total=5, allowed_methods=('GET', 'POST'), status_forcelist=[429, 500, 502, 503, 504])
 adapter = HTTPAdapter(max_retries=retry_strategy)
@@ -91,6 +90,10 @@ class ListenBrainz:
             self.ratelimit_reset_in = None
 
 
+    def _build_url(self, endpoint):
+        return f"{self.api_base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+
+
     def _get(self, endpoint, params=None, headers=None):
         if not params:
             params = {}
@@ -106,7 +109,7 @@ class ListenBrainz:
         try:
             self._wait_until_rate_limit()
             response = session.get(
-                urljoin(self.api_base_url, endpoint),
+                self._build_url(endpoint),
                 params=params,
                 headers=headers,
             )
@@ -140,7 +143,7 @@ class ListenBrainz:
         try:
             self._wait_until_rate_limit()
             response = session.post(
-                urljoin(self.api_base_url, endpoint),
+                self._build_url(endpoint),
                 data=data,
                 headers=headers,
             )
