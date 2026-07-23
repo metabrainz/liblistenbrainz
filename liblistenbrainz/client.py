@@ -170,9 +170,13 @@ class ListenBrainz:
             'listen_type': listen_type,
             'payload': listen_payload
         }
+        headers = {
+            'Content-Type': 'application/json',
+        }
         return self._post(
             '/1/submit-listens',
             data=json.dumps(submit_json),
+            headers=headers,
         )
 
 
