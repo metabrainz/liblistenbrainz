@@ -234,21 +234,15 @@ class ListenBrainzClientTestCase(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_custom_api_base_url(self, m):
-
-        self.client.api_base_url = "http://example.com/apis/listenbrainz"
-
-        expectedUrl = "http://example.com/apis/listenbrainz/1/validate-token"
-    
-        m.get(
-            expectedUrl,
-            json={"valid": True},
-        )  
+        self.client.api_base_url = 'http://example.com/apis/listenbrainz'
+        expected_url = 'http://example.com/apis/listenbrainz/1/validate-token'
+        m.get(expected_url, json={'valid': True})
 
         auth_token = str(uuid.uuid4())
         self.client.set_auth_token(auth_token)
 
-        self.assertEqual(m.call_count,1)
-        self.assertEqual(m.last_request.url, expectedUrl)
+        self.assertEqual(m.call_count, 1)
+        self.assertEqual(m.last_request.url, expected_url)
         self.assertEqual(self.client._auth_token, auth_token)
 
     @requests_mock.Mocker()
