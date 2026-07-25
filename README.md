@@ -1,10 +1,10 @@
 # liblistenbrainz
 
 *liblistenbrainz* is a simple Python library for the
-[ListenBrainz Web API](https://listenbrainz.readthedocs.io/en/production/dev/api/).
+[ListenBrainz Web API](https://listenbrainz.readthedocs.io/en/latest/users/api/index.html).
 
 liblistenbrainz will help you start getting data from and submitting data to
-[ListenBrainz](https://listenbrainz.org>) very quickly.
+[ListenBrainz](https://listenbrainz.org) very quickly.
 
 Here's an example of getting the listening history of a ListenBrainz user::
 
@@ -47,7 +47,7 @@ liblistenbrainz provides easy access to all ListenBrainz endpoints, handles
 ratelimits automatically and supports the ListenBrainz authorization flow.
 
 For details on the API endpoints that can be used via liblistenbrainz, take
-a look at the [ListenBrainz API Documentation](https://listenbrainz.readthedocs.io/en/production/dev/api/).
+a look at the [ListenBrainz API Documentation](https://listenbrainz.readthedocs.io/en/latest/users/api/index.html).
 
 ## Installation
 
@@ -79,5 +79,5 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program.  If not, see [GNU licenses](https://www.gnu.org/licenses/).
 ```
