@@ -40,11 +40,9 @@ STATS_SUPPORTED_TIME_RANGES = (
 )
 
 
-
-
 class ListenBrainz:
 
-    def __init__(self, api_base_url = 'https://api.listenbrainz.org'):
+    def __init__(self, api_base_url='https://api.listenbrainz.org'):
         self._auth_token = None
 
         # initialize rate limit variables with None
@@ -53,11 +51,9 @@ class ListenBrainz:
         self.ratelimit_reset_in = None
         self.api_base_url = api_base_url
 
-
     def _require_auth_token(self):
         if not self._auth_token:
             raise errors.AuthTokenRequiredException
-
 
     def _wait_until_rate_limit(self):
         # if we haven't made any request before this, return
@@ -76,7 +72,6 @@ class ListenBrainz:
             if current_ts < reset_ts:
                 time.sleep(reset_ts - current_ts)
 
-
     def _update_rate_limit_variables(self, response):
         self._last_request_ts = int(time.time())
         try:
@@ -89,10 +84,8 @@ class ListenBrainz:
         except (TypeError, ValueError):
             self.ratelimit_reset_in = None
 
-
     def _build_url(self, endpoint):
         return f"{self.api_base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-
 
     def _get(self, endpoint, params=None, headers=None):
         if not params:
@@ -103,7 +96,7 @@ class ListenBrainz:
             headers['Authorization'] = f'Token {self._auth_token}'
 
         session = requests.Session()
-        session.mount("http://", adapter) # http is not used, but in case someone needs to use to for dev work, its included here
+        session.mount("http://", adapter)  # http is not used, but in case someone needs to use to for dev work, its included here
         session.mount("https://", adapter)
 
         try:
@@ -129,7 +122,6 @@ class ListenBrainz:
             raise errors.ListenBrainzAPIException(status_code=204)
         return response.json()
 
-
     def _post(self, endpoint, data=None, headers=None):
         if not headers:
             headers = {}
@@ -137,7 +129,7 @@ class ListenBrainz:
             headers['Authorization'] = f'Token {self._auth_token}'
 
         session = requests.Session()
-        session.mount("http://", adapter) # http is not used, but in case someone needs to use to for dev work, its included here
+        session.mount("http://", adapter)  # http is not used, but in case someone needs to use to for dev work, its included here
         session.mount("https://", adapter)
 
         try:
@@ -161,7 +153,6 @@ class ListenBrainz:
 
         return response.json()
 
-
     def _post_submit_listens(self, listens, listen_type):
         self._require_auth_token()
         _validate_submit_listens_payload(listen_type, listens)
@@ -174,7 +165,6 @@ class ListenBrainz:
             '/1/submit-listens',
             data=json.dumps(submit_json),
         )
-
 
     def set_auth_token(self, auth_token, check_validity=True):
         """
@@ -197,7 +187,6 @@ class ListenBrainz:
             if not response["valid"]:
                 raise errors.InvalidAuthTokenException
 
-
     def submit_multiple_listens(self, listens):
         """ Submit a list of listens to ListenBrainz.
 
@@ -209,7 +198,6 @@ class ListenBrainz:
         :raises InvalidSubmitListensPayloadException: if the listens sent are invalid, see exception message for details
         """
         return self._post_submit_listens(listens, LISTEN_TYPE_IMPORT)
-
 
     def submit_single_listen(self, listen):
         """ Submit a single listen to ListenBrainz.
@@ -223,7 +211,6 @@ class ListenBrainz:
         """
         return self._post_submit_listens([listen], LISTEN_TYPE_SINGLE)
 
-
     def submit_playing_now(self, listen):
         """ Submit a playing now notification to ListenBrainz.
 
@@ -236,18 +223,34 @@ class ListenBrainz:
         """
         return self._post_submit_listens([listen], LISTEN_TYPE_PLAYING_NOW)
 
-    def submit_user_feedback(self, feedback, recording_mbid):
-        """ Submit a feedback to Listenbrainz
-            
+    def submit_user_feedback(self, feedback, recording_mbid=None, recording_msid=None):
+        """ Submit a feedback (love/hate) to ListenBrainz.
+
         Requires that the auth token for the user whose data is being submitted has been set.
 
-        :param feedback The type of feedback 1 = loved, -1 = hated, 0 = delete feedback if any
-        :param recording_mbid The recording Musicbrainz Id of the track being anotated
+        :param feedback: The type of feedback 1 = loved, -1 = hated, 0 = delete feedback if any
+        :type feedback: int
+        :param recording_mbid: The recording MusicBrainz Id of the track being annotated (optional)
+        :type recording_mbid: str, optional
+        :param recording_msid: The recording MessyBrainz Id of the track being annotated (optional)
+        :type recording_msid: str, optional
+
+        Note: at least one of recording_mbid or recording_msid must be provided.
+
+        :raises ValueError: if neither recording_mbid nor recording_msid is provided
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         """
+        if recording_mbid is None and recording_msid is None:
+            raise ValueError('At least one of recording_mbid or recording_msid must be provided')
+
         data = {
             'score': feedback,
-            'recording_mbid': recording_mbid,
         }
+        if recording_mbid is not None:
+            data['recording_mbid'] = recording_mbid
+        if recording_msid is not None:
+            data['recording_msid'] = recording_msid
+
         headers = {
             'Content-Type': 'application/json',
         }
@@ -256,7 +259,6 @@ class ListenBrainz:
             data=json.dumps(data),
             headers=headers,
         )
-
 
     def delete_listen(self, listen):
         """ Delete a particular listen from a user’s listen history.
@@ -283,7 +285,6 @@ class ListenBrainz:
             headers=headers,
         )
 
-
     def get_playing_now(self, username):
         """ Get the listen being played right now for user `username`.
 
@@ -295,10 +296,9 @@ class ListenBrainz:
         """
         data = self._get('/1/user/{username}/playing-now'.format(username=username))
         listens = data['payload']['listens']
-        if len(listens) > 0: # should never be greater than 1
+        if len(listens) > 0:  # should never be greater than 1
             return _convert_api_payload_to_listen(listens[0])
         return None
-
 
     def get_listens(self, username, max_ts=None, min_ts=None, count=None):
         """ Get listens for user `username`
@@ -352,7 +352,6 @@ class ListenBrainz:
             else:
                 raise
 
-
     def get_user_artists(self, username, count=25, offset=0, time_range='all_time'):
         """ Get artists for user 'username', sorted in descending order of listen count.
 
@@ -373,7 +372,6 @@ class ListenBrainz:
         """
         return self._get_user_entity(username, 'artists', count, offset, time_range)
 
-
     def get_user_recordings(self, username, count=25, offset=0, time_range='all_time'):
         """ Get recordings for user 'username', sorted in descending order of listen count.
 
@@ -393,7 +391,6 @@ class ListenBrainz:
         :rtype: dict
         """
         return self._get_user_entity(username, 'recordings', count, offset, time_range)
-
 
     def get_user_releases(self, username, count=25, offset=0, time_range='all_time'):
         """ Get releases for user 'username', sorted in descending order of listen count.
@@ -434,7 +431,6 @@ class ListenBrainz:
         :rtype: dict
         """
         return self._get_user_entity(username, 'release-groups', count, offset, time_range)
-
 
     def get_user_recommendation_recordings(self, username, artist_type='top', count=25, offset=0):
         """ Get recommended recordings for a user.
@@ -491,9 +487,9 @@ class ListenBrainz:
             else:
                 raise
 
-    def get_user_feedback(self, username, score, metadata, count=100, offset=0 ):
+    def get_user_feedback(self, username, score, metadata, count=100, offset=0):
         """ Get feedback given by user
-        
+
         :param username: The user to get the feedbacks from
         :type username: str
         :param count: Optional, number of feedback items to return. Default 100.
@@ -518,3 +514,106 @@ class ListenBrainz:
                 return None
             else:
                 raise
+
+    def get_feedback_for_recording_mbid(self, recording_mbid, score=None, count=None, offset=None):
+        """ Get feedback for a recording identified by its MusicBrainz Id.
+
+        :param recording_mbid: the MusicBrainz Id of the recording
+        :type recording_mbid: str
+        :param score: Optional, If 1 then returns the loved recordings, if -1 returns hated recordings.
+        :type score: int, optional
+        :param count: Optional, number of feedback items to return.
+        :type count: int, optional
+        :param offset: Optional, number of feedback items to skip from the beginning, for pagination.
+        :type offset: int, optional
+
+        :return: the feedback for the given recording, in the same format as the API response, or
+            None if the API returns a 204 (no content)
+        :rtype: dict or None
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        """
+        params = {}
+        if score is not None:
+            params['score'] = score
+        if count is not None:
+            params['count'] = count
+        if offset is not None:
+            params['offset'] = offset
+
+        try:
+            return self._get(f'/1/feedback/recording/{recording_mbid}/get-feedback-mbid', params=params)
+        except errors.ListenBrainzAPIException as e:
+            if e.status_code == 204:
+                return None
+            else:
+                raise
+
+    def get_feedback_for_recording_msid(self, recording_msid, score=None, count=None, offset=None):
+        """ Get feedback for a recording identified by its MessyBrainz Id.
+
+        :param recording_msid: the MessyBrainz Id of the recording
+        :type recording_msid: str
+        :param score: Optional, If 1 then returns the loved recordings, if -1 returns hated recordings.
+        :type score: int, optional
+        :param count: Optional, number of feedback items to return.
+        :type count: int, optional
+        :param offset: Optional, number of feedback items to skip from the beginning, for pagination.
+        :type offset: int, optional
+
+        :return: the feedback for the given recording, in the same format as the API response, or
+            None if the API returns a 204 (no content)
+        :rtype: dict or None
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        """
+        params = {}
+        if score is not None:
+            params['score'] = score
+        if count is not None:
+            params['count'] = count
+        if offset is not None:
+            params['offset'] = offset
+
+        try:
+            return self._get(f'/1/feedback/recording/{recording_msid}/get-feedback', params=params)
+        except errors.ListenBrainzAPIException as e:
+            if e.status_code == 204:
+                return None
+            else:
+                raise
+
+    def get_feedback_for_recordings(self, username, recording_mbids=None, recording_msids=None):
+        """ Get feedback given by user `username` for a list of recordings.
+
+        If feedback for a given recording doesn't exist, a score of 0 is returned for it.
+
+        :param username: the MusicBrainz Id of the user whose feedback is being fetched
+        :type username: str
+        :param recording_mbids: Optional, list of recording MBIDs to check feedback for
+        :type recording_mbids: List[str], optional
+        :param recording_msids: Optional, list of recording MSIDs to check feedback for
+        :type recording_msids: List[str], optional
+
+        Note: at least one of recording_mbids or recording_msids must be provided.
+
+        :return: the feedback for the given recordings, in the same format as the API response
+        :rtype: dict
+        :raises ValueError: if neither recording_mbids nor recording_msids is provided
+        :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
+        """
+        if not recording_mbids and not recording_msids:
+            raise ValueError('At least one of recording_mbids or recording_msids must be provided')
+
+        data = {}
+        if recording_mbids:
+            data['recording_mbids'] = recording_mbids
+        if recording_msids:
+            data['recording_msids'] = recording_msids
+
+        headers = {
+            'Content-Type': 'application/json',
+        }
+        return self._post(
+            f'/1/feedback/user/{username}/get-feedback-for-recordings',
+            data=json.dumps(data),
+            headers=headers,
+        )
