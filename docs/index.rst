@@ -61,8 +61,8 @@ Or you can get the source code from GitHub at https://github.com/paramsingh/libl
 Getting Started
 ###############
 
-It is easy to get started retrieving data from ListenBrainz using liblistenbrainz. No
-authentication is required for getting data.
+It is easy to get started retrieving public data from ListenBrainz using liblistenbrainz.
+User history exports require authentication, including listing and downloading exports.
 
 To submit data for a user, liblistenbrainz requires that you have the user's ListenBrainz auth
 token. Each user has a unique auth token available on their profile page.
@@ -92,6 +92,53 @@ Examples
 
 There are more examples of how to use liblistenbrainz
 in the `examples directory on GitHub <https://github.com/paramsingh/liblistenbrainz/tree/master/examples>`_.
+
+User history exports
+####################
+
+Use an export for a large history import and ``get_listens`` for recent listens or
+small incremental updates. All export methods use the account identified by the
+auth token; they take no username. See the
+`export API documentation <https://listenbrainz.readthedocs.io/en/latest/users/api/export.html>`_
+for the archive format and server limits.
+
+List existing exports first so you can reuse a suitable completed archive or
+resume an existing job::
+
+    import os
+    import liblistenbrainz
+
+    client = liblistenbrainz.ListenBrainz()
+    client.set_auth_token(os.environ['LB_TOKEN'])
+    exports = client.list_exports()
+
+When no suitable export exists, request one and save its ID::
+
+    export = client.create_export()
+    export_id = export['export_id']
+
+For a limited listen range, use ``create_export(start_time=1767225600,
+end_time=1769903999)`` instead. Both bounds are inclusive integer UNIX timestamps;
+either can be omitted with ``None``. Feedback, pinned recordings, and account
+information are exported in full regardless of the listen range.
+
+Check the saved ID in a later call::
+
+    export = client.get_export(export_id)
+    if export['status'] == 'completed':
+        client.download_export(export_id, 'history.zip')
+
+The library does not poll automatically. Space status requests at least 30 seconds
+apart and increase the delay with jitter up to around 120 seconds. Stop on
+``failed`` and check ``available_until`` before using a completed export.
+Creation is not automatically retried: after a timeout, list exports before
+requesting another job.
+
+Downloads stream to disk and return the destination path. Existing files are
+overwritten; an interruption may leave a partial file. Restart downloads with
+the same export ID. A download 404 does not imply that a new export is needed.
+When an export is no longer needed by any of the user's clients, explicitly call
+``client.delete_export(export_id)``; exports are never deleted automatically.
 
 API Reference
 #############
