@@ -295,6 +295,117 @@ class ListenBrainz:
         )
 
 
+    def create_export(self, start_time=None, end_time=None):
+        """ Queue an export for the authenticated user.
+
+        Omit both bounds to export the full listening history. Bounds are inclusive
+        UNIX timestamps in seconds and filter listens only; feedback, pinned
+        recordings, and account information are always exported in full.
+        Only one export may be pending per user. This method does not poll or
+        automatically retry: after a timeout, call :meth:`list_exports` before
+        trying again, as the first request may already have queued an export.
+
+        :param start_time: inclusive start of the listen range, or None to omit
+        :type start_time: int, optional
+        :param end_time: inclusive end of the listen range, or None to omit
+        :type end_time: int, optional
+        :return: export metadata, including export_id and status
+        :rtype: dict
+        :raises AuthTokenRequiredException: if no auth token has been set
+        :raises ValueError: if bounds are not integers or start_time exceeds end_time
+        :raises ListenBrainzAPIException: if the API rejects the request
+        """
+        self._require_auth_token()
+        bounds = {}
+        for name, value in (('start_time', start_time), ('end_time', end_time)):
+            if value is not None:
+                if isinstance(value, bool) or not isinstance(value, int):
+                    raise ValueError(f'{name} must be an integer UNIX timestamp')
+                bounds[name] = value
+        if start_time is not None and end_time is not None and start_time > end_time:
+            raise ValueError('start_time must be less than or equal to end_time')
+        return self._post(
+            '/1/export/',
+            data=json.dumps(bounds) if bounds else None,
+            headers={'Content-Type': 'application/json'} if bounds else None,
+            retry=False,
+        )
+
+
+    def list_exports(self):
+        """ List the authenticated user's exports, newest first.
+
+        Reuse a suitable completed export or poll an existing pending export
+        before creating another. There are no pagination parameters.
+
+        :return: export metadata objects, or an empty list if there are none
+        :rtype: list[dict]
+        :raises AuthTokenRequiredException: if no auth token has been set
+        :raises ListenBrainzAPIException: if the API rejects the request
+        """
+        self._require_auth_token()
+        return self._get('/1/export/list')
+
+
+    def get_export(self, export_id):
+        """ Get an export's metadata for the authenticated user.
+
+        Status is waiting, in_progress, completed, or failed. Poll at intervals
+        of at least 30 seconds, increasing the delay with jitter up to around
+        120 seconds. Stop polling on failure. Use available_until to determine
+        when a completed archive expires.
+
+        :param export_id: the ID returned by create_export or list_exports
+        :type export_id: int
+        :return: export metadata, including status and progress
+        :rtype: dict
+        :raises AuthTokenRequiredException: if no auth token has been set
+        :raises ListenBrainzAPIException: if the API rejects the request
+        """
+        self._require_auth_token()
+        return self._get(f'/1/export/{export_id}')
+
+
+    def download_export(self, export_id, destination):
+        """ Stream a completed export's ZIP archive to a local file.
+
+        The destination is overwritten once the server accepts the request.
+        An interrupted download may leave a partial file; restart with the same
+        export ID. Downloads cannot be resumed. A 404 may mean the export is
+        unfinished or expired; check its status before requesting a new one.
+
+        :param export_id: the ID of the completed export
+        :type export_id: int
+        :param destination: local path at which to save the archive
+        :type destination: str or os.PathLike
+        :return: the destination path
+        :rtype: str or os.PathLike
+        :raises AuthTokenRequiredException: if no auth token has been set
+        :raises ListenBrainzAPIException: if the API rejects the request
+        :raises OSError: if the destination cannot be written
+        """
+        self._require_auth_token()
+        return self._get(f'/1/export/{export_id}/download', destination=destination)
+
+
+    def delete_export(self, export_id):
+        """ Delete an export record and its queued task for the authenticated user.
+
+        Archive storage is reclaimed asynchronously and a running worker may
+        not stop immediately. Exports are shared by the user's clients, so only
+        delete an export when it is no longer needed by any of them.
+
+        :param export_id: the ID of the export to delete
+        :type export_id: int
+        :return: the API response, containing success on successful deletion
+        :rtype: dict
+        :raises AuthTokenRequiredException: if no auth token has been set
+        :raises ListenBrainzAPIException: if the API rejects the request
+        """
+        self._require_auth_token()
+        return self._post(f'/1/export/{export_id}/delete')
+
+
     def get_playing_now(self, username):
         """ Get the listen being played right now for user `username`.
 
