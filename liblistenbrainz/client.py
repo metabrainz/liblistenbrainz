@@ -20,7 +20,7 @@ from requests.adapters import HTTPAdapter
 import time
 from urllib3.util import Retry
 
-from liblistenbrainz import errors
+from liblistenbrainz import __version__, errors
 from liblistenbrainz.listen import LISTEN_TYPE_IMPORT, LISTEN_TYPE_PLAYING_NOW, LISTEN_TYPE_SINGLE
 from liblistenbrainz.utils import _validate_submit_listens_payload, _convert_api_payload_to_listen
 
@@ -102,9 +102,10 @@ class ListenBrainz:
         if self._auth_token:
             headers['Authorization'] = f'Token {self._auth_token}'
 
-        session = requests.Session()
-        session.mount("http://", adapter) # http is not used, but in case someone needs to use to for dev work, its included here
-        session.mount("https://", adapter)
+        with requests.Session() as session:
+            session.headers['User-Agent'] = f'liblistenbrainz/{__version__}'
+            session.mount("http://", adapter)
+            session.mount("https://", adapter)
 
         try:
             self._wait_until_rate_limit()
@@ -137,8 +138,10 @@ class ListenBrainz:
             headers['Authorization'] = f'Token {self._auth_token}'
 
         session = requests.Session()
-        session.mount("http://", adapter) # http is not used, but in case someone needs to use to for dev work, its included here
-        session.mount("https://", adapter)
+        session.headers['User-Agent'] = f'liblistenbrainz/{__version__}'
+        if retry:
+            session.mount("http://", adapter) # http is not used, but in case someone needs to use to for dev work, its included here
+            session.mount("https://", adapter)
 
         try:
             self._wait_until_rate_limit()
