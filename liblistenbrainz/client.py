@@ -94,7 +94,7 @@ class ListenBrainz:
         return f"{self.api_base_url.rstrip('/')}/{endpoint.lstrip('/')}"
 
 
-    def _get(self, endpoint, params=None, headers=None):
+    def _get(self, endpoint, params=None, headers=None, destination=None):
         if not params:
             params = {}
         if not headers:
@@ -106,32 +106,40 @@ class ListenBrainz:
             session.headers['User-Agent'] = f'liblistenbrainz/{__version__}'
             session.mount("http://", adapter)
             session.mount("https://", adapter)
+            request_options = {'stream': True} if destination is not None else {}
 
-        try:
             self._wait_until_rate_limit()
-            response = session.get(
+            with session.get(
                 self._build_url(endpoint),
                 params=params,
                 headers=headers,
-            )
-            self._update_rate_limit_variables(response)
-            response.raise_for_status()
-        except requests.HTTPError as e:
-            status_code = e.response.status_code
+                **request_options,
+            ) as response:
+                self._update_rate_limit_variables(response)
+                try:
+                    response.raise_for_status()
+                except requests.HTTPError as e:
+                    status_code = e.response.status_code
 
-            # get message from the json in the response if possible
-            try:
-                message = e.response.json().get('error', '')
-            except Exception:
-                message = None
-            raise errors.ListenBrainzAPIException(status_code=status_code, message=message) from e
+                    # get message from the json in the response if possible
+                    try:
+                        message = e.response.json().get('error', '')
+                    except Exception:
+                        message = None
+                    raise errors.ListenBrainzAPIException(status_code=status_code, message=message) from e
 
-        if response.status_code == 204:
-            raise errors.ListenBrainzAPIException(status_code=204)
-        return response.json()
+                if response.status_code == 204:
+                    raise errors.ListenBrainzAPIException(status_code=204)
+                if destination is not None:
+                    with open(destination, 'wb') as output:
+                        for chunk in response.iter_content(chunk_size=64 * 1024):
+                            if chunk:
+                                output.write(chunk)
+                    return destination
+                return response.json()
 
 
-    def _post(self, endpoint, data=None, headers=None):
+    def _post(self, endpoint, data=None, headers=None, retry=True):
         if not headers:
             headers = {}
         if self._auth_token:
