@@ -110,7 +110,7 @@ class Listen:
 
     def _to_submit_payload(self):
         # create the additional_info dict first
-        additional_info = self.additional_info
+        additional_info = self.additional_info.copy()
         if self.recording_mbid:
             additional_info['recording_mbid'] = self.recording_mbid
         if self.artist_mbids:
