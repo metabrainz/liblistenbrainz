@@ -14,13 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import sys
-
-if sys.version_info >= (3, 10):
-    from importlib.metadata import version, PackageNotFoundError
-else:
-    # importlib.metadata's API changed in 3.10, so use a backport for versions less than this.
-    from importlib_metadata import version, PackageNotFoundError
+from importlib.metadata import version, PackageNotFoundError
 
 try:
     __version__ = version(__name__)
