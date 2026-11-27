@@ -293,7 +293,7 @@ class ListenBrainz:
         :rtype: liblistenbrainz.Listen or None
         :raises ListenBrainzAPIException: if the ListenBrainz API returns a non 2xx return code
         """
-        data = self._get('/1/user/{username}/playing-now'.format(username=username))
+        data = self._get(f'/1/user/{username}/playing-now')
         listens = data['payload']['listens']
         if len(listens) > 0: # should never be greater than 1
             return _convert_api_payload_to_listen(listens[0])
@@ -328,7 +328,7 @@ class ListenBrainz:
             params['count'] = count
 
         data = self._get(
-            '/1/user/{username}/listens'.format(username=username),
+            f'/1/user/{username}/listens',
             params=params,
         )
         listens = data['payload']['listens']
